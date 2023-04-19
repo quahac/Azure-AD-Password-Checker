@@ -29,6 +29,7 @@ parser.add_argument('-lo','--out-of-hours', action='store_true', default=False,
 
 if len(sys.argv)==1:
     parser.print_help()
+    sys.exit(1)
 
 args = parser.parse_args()
 
