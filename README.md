@@ -13,7 +13,6 @@ Roadrecon tool is developed by dirkjanm and can be download on github https://gi
 How to use see:
 ```
 python3 azurepwchecker.py
-py azurepwchecker.py
 usage: azurepwchecker.py [-h] [--roadrecon-dump] [--roadrecon-dump-mfa] [-d DB] [-m] [-l] [-ll] [-lll] [-la] [-lo]
 
 Azure AD Password Checker - This is a parser for the roadrecon database file designed for use by both red and blue teams. While the roadrecon tool can
