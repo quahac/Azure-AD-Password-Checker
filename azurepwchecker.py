@@ -3,7 +3,7 @@ import os
 import subprocess
 import sqlite3
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
 parser = argparse.ArgumentParser(description='Azure AD Password Checker - This is a parser for the roadrecon database file designed for use by both red and blue teams. While the roadrecon tool can provide live data for analysis, it is not required for using this parser! roadrecon is developed by https://github.com/dirkjanm credits to him!')
 
@@ -15,7 +15,7 @@ group_tool.add_argument('--roadrecon-dump-mfa', action='store_true', default=Fal
 parser.add_argument('-d','--db', type=str, default='roadrecon.db',
                     help="Specify the path to the 'roadrecon.db' database file, default is this location")
 parser.add_argument('-m','--mfa-list',action='store_true', default=False,
-                    help="User Accounts without MFA (No privileged user required)! This argument helps identify user accounts that have not enabled Multi-Factor Authentication (MFA). If an account's creation date and time match its last password change date and time, it may indicate that no human interaction has occurred since the account was created, and the user has not been able to enable MFA or change their password")        
+                    help="User Accounts without MFA (No privileged user required)! This argument helps identify user accounts that have not enabled Multi-Factor Authentication (MFA). If an account's creation date and time match its last password change date and time, it may indicate that no human interaction has occurred since the account was created, and the user has not been able to enable MFA or change their password. And there are other 'anomalies' such as the password change date being older than the creation date. This suggests also that Multi-Factor Authentication (MFA) couldn't be enabled because the User wasn't created yet! :-]")   
 parser.add_argument('-l','--pw-month', action='store_true', default=False,
                     help='User accounts that had their passwords changed last month')
 parser.add_argument('-ll','--pw-year', action='store_true', default=False,
@@ -27,11 +27,15 @@ parser.add_argument('-la','--admin', action='store_true', default=False,
 parser.add_argument('-lo','--out-of-hours', action='store_true', default=False,
                     help="User password change that occurred outside of office hours, specifically between 5:00 PM (17:00) and 8:00 AM (08:00) on weekdays, as well as on Saturdays and Sundays")    
 
+args = parser.parse_args()
+
 if len(sys.argv)==1:
     parser.print_help()
     sys.exit(1)
 
-args = parser.parse_args()
+if not os.path.isfile(args.db):
+    print(f"Error: Database file '{args.db}' not found.")
+    exit()
 
 if args.roadrecon_dump:
     subprocess.run(["roadrecon", "dump"])
@@ -54,23 +58,20 @@ conn = sqlite3.connect(db_path)
 cur = conn.cursor()
 
 if args.mfa_list:
-    cur.execute(f"SELECT userPrincipalName, strftime('%Y-%m-%d %H:%M', lastPasswordChangeDateTime), strftime('%Y-%m-%d %H:%M', createdDateTime), accountEnabled, objectId FROM users WHERE accountEnabled = 1 ORDER BY lastPasswordChangeDateTime ASC ")
+    cur.execute(f"SELECT userPrincipalName, strftime('%Y-%m-%d %H:%M', lastPasswordChangeDateTime), strftime('%Y-%m-%d %H:%M', createdDateTime), strftime('%s', lastPasswordChangeDateTime) - strftime('%s', createdDateTime) as timeDifference, objectId FROM users WHERE accountEnabled = 1 AND timeDifference < 600 ORDER BY lastPasswordChangeDateTime ASC")
     rows = cur.fetchall()
     print("")
-    print("MFA is not enabled on these Users! (prediction)")
-    print("-----------------------------------------------")
-    print(line.underline +"Password Changed"+ line.end+" "*3+line.underline+"User Created"+line.end+" "*7+line.underline+"UserPrincipalName"+ line.end)
+    print("Multi-Factor Authentication (MFA) is not enabled on these Users! (prediction)")
+    print("There are anomalies, such as the password change date being older than the creation date. \nThis suggests that MFA couldn't be enabled because the User wasn't created yet! :-)")
+    print(yellow+"Yellow color is difference time in seconds Created vs Last Password Change datetime"+white)
+    print("------------------------------------------------------------------------------------------")
+    print(line.underline +"Password Changed"+ line.end+" "*3+ line.underline +"User Created"+line.end+" "*7+line.underline+"UserPrincipalName"+ line.end)
     for i, row in enumerate(rows):
         mail = row[0] if row[0] is not None else ""
         pw_last_change = row[1] if row[1] is not None else ""
         created = row[2] if row[2] is not None else ""
-
-        time_diff = datetime.strptime(created, '%Y-%m-%d %H:%M') - datetime.strptime(pw_last_change, '%Y-%m-%d %H:%M')
-        time_since_last_change = int(time_diff.total_seconds() // 60)
-
-        if i > 0 and row[1][:10] == rows[i-1][1][:10] and row[2][:10] == rows[i-1][2][:10]:
-            if time_since_last_change == 0:
-                print(f"{pw_last_change}   {created}   {mail}")
+        timediff = row[3] if row[3] is not None else ""
+        print(f"{pw_last_change}   {created}   {mail} {yellow}({timediff} sec){white}")
     print("")
      
 if args.pw_month:
@@ -89,7 +90,6 @@ if args.pw_month:
             info = True
         else:
             print(f"{pw_last_change}   {mail}")
-
     if info:
         print(f"{yellow}Yellow color = password changed time after working hours!{white}")
     print("")
