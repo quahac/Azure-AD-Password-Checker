@@ -43,3 +43,6 @@ See intro:
 
 https://user-images.githubusercontent.com/49560894/233073626-d1ccc173-c3cf-4751-878b-e8f0c65e6c0a.mp4
 
+Update intro:
+
+![image](https://user-images.githubusercontent.com/49560894/233487227-3f96dc42-9e5d-43f2-b577-92c6830e6aa1.png)
