@@ -58,6 +58,37 @@ run roadrecon first:
   --roadrecon-dump      "roadrecon dump" command or do it with roadrecon
   --roadrecon-dump-mfa  "roadrecon dump --mfa" command (requires privileged access) or do it with roadrecon
   ```
+
+## Don't have roadrecon > generate and copy ```azurepwchecker.py --code-javascript``` or js file in folder:
+
+Follow these steps to retrieve a list of users along with their account information using the provided script.
+
+1. **Login to Azure Portal**
+   - Go to [https://portal.azure.com](https://portal.azure.com) and log in with your valid account.
+
+2. **Access User Management**
+   - Navigate to [User Management](https://portal.azure.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers) in the Azure portal.
+
+3. **Open Developer Tools**
+   - Press `F12` on your web browser to open the developer tools.
+
+4. **Execute the Script**
+   - Copy and paste the provided script.
+
+5. **Retrieve UsersList and UserInfo**
+   - The script will fetch the UsersList along with user information including creation date and last password change.
+
+6. **Download Merged User Information**
+   - Once the script execution is complete, check your downloads. A file named `merged_users.json` will be generated if everything went smoothly.
+
+7. **Run on Azure AD Password Checker**
+   -  `azurepwchecker.py --json-input merged_users.json` 
+  
+
+See example:
+
+https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/0fd77e2c-068e-4aef-aafd-c5ec23db7385
+
 See intro:
 
 https://user-images.githubusercontent.com/49560894/233073626-d1ccc173-c3cf-4751-878b-e8f0c65e6c0a.mp4
@@ -68,5 +99,5 @@ Update 16-10-2023:
 
 How to use the ```--code-javascript``` argument to generate a list of users on the Azure Portal, which can then be imported using the command ```azurepwchecker.py --json-input merged_users.json```:
 
-https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/0fd77e2c-068e-4aef-aafd-c5ec23db7385
+
 
