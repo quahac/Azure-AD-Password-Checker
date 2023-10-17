@@ -59,7 +59,7 @@ run roadrecon first:
   --roadrecon-dump-mfa  "roadrecon dump --mfa" command (requires privileged access) or do it with roadrecon
   ```
 
-## Don't have roadrecon > generate and copy ```azurepwchecker.py --code-javascript``` or js file in folder:
+### Don't have roadrecon > generate and copy ```azurepwchecker.py --code-javascript``` or js file in folder:
 
 Follow these steps to retrieve a list of users along with their account information using the provided script.
 
