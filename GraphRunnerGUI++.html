@@ -1,0 +1,2556 @@
+<!-- 
+MIT License
+
+Copyright (c) Beau Bullock 2023
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Edited by @quahac
+-->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphRunner</title>
+    <style>
+        body {
+            font-family: Courier, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #505050;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"]{
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            width: 100%; 
+            max-width: 400px; 
+        }
+        input[type="submit"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="file"] {
+            padding: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #357EC7;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #B4CFEC;
+        }
+        .response {
+            border: 1px solid #ccc;
+            padding: 4px;
+            border-radius: 4px;
+            background-color: #303030;
+            white-space: pre-wrap;
+        }
+
+        .item-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        }
+
+        .item-card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        width: 200px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .item-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-thumbnail {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        }
+
+        .item-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 8px 0;
+        }
+
+        .item-description {
+        font-size: 14px;
+        color: #666;
+        }
+
+        .item-action {
+        display: inline-block;
+        padding: 6px 12px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: background-color 0.2s ease-in-out;
+        }
+
+        .item-action:hover {
+        background-color: #0056b3;
+        }
+
+        .input-button {
+            padding: 10px 20px;
+            background-color: #357EC7;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .input-button:hover {
+            background-color: #B4CFEC;
+        }
+
+        /* Email Viewer Styles */
+        .email-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 0px;
+            font-size: 14px;
+            margin-right: 10px;
+            max-width: 40%;
+        }
+
+        .search-button {
+            padding: 10px 20px;
+            background-color: #357EC7;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background-color: #B4CFEC;
+        }
+
+        .email-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+            gap: 8px;
+        }
+
+        .email-summary {
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #303030;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .email-summary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-detail {
+            margin-top: 20px;
+            padding: 4px;
+            border: 1px solid #ccc;
+            background-color: #dddddd;
+            border-radius: 4px;
+            color: #000000;
+        }
+
+        .email-detail h3 {
+            margin-bottom: 10px;
+            color: #000000;
+        }
+
+        .email-detail strong {
+            font-weight: bold;
+        }
+
+        .email-detail p {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #FFFFFF;
+        }
+
+        .email-detail a {
+            color: #B0E0E6;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .email-detail a:hover {
+            color: #0056b3;
+        }
+        select#httpMethod {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            width: 100%; 
+            max-width: 80px; 
+        }
+        #chatViewer {
+            margin-bottom: 20px;
+        }
+
+        .chat-summary {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            background-color: #303030;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .chat-summary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #chatMessages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            margin-top: 20px;
+            color: #000000;
+        }
+        .message {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .message-content {
+            margin-top: 5px;
+        }
+
+        /* Style for image attachments */
+        .message-content img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        /* Style for file links */
+        .message-content a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .message-content a:hover {
+            color: #0056b3;
+        }
+        .file-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .file-details {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .file-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .item-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .item-details {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        .sharepoint-drive-summary {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            background-color: #303030;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .sharepoint-drive-summary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .sharepoint-item-summary {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            background-color: #303030;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .sharepoint-item-summary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .text-links {
+        text-align: center;
+        }
+
+    </style>
+
+</head>
+<body>
+    <div class="container">
+    <h1>GraphRunner</h1>
+    <h3>A GUI for the Microsoft Graph API</h3>
+    <div class="text-links">
+    <a class="links" href="https://github.com/quahac" target="_blank"  style="color: #82cdfb;">Edited version by @QuaHac</a><br>
+    <a class="links" href="https://github.com/dafthack/GraphRunner" target="_blank" style="color: #6be352;">Original version and credits to @DaftHack</a><br><br><br>
+    </div>
+    
+       
+
+	
+	<label>Upload HAR File: </label>
+    <input type="file" id="fileInput" accept=".har" multiple class="search-input">
+    <br><br>
+    <select name="sessions" id="tokensSessions" onchange="toggleVisibility(this.value)">
+    <label for="sessions">Choose Access Token / Refresh Token </label>
+        <option value="accessTokens">Access Tokens</option>
+        <option value="refreshTokens">Refresh Tokens</option>
+    </select>
+
+    <div id="accessTokens">
+        <label>Url:</label>
+        <select id="urls" size="5"  onchange="updateHeaders(this.value)" ></select>
+        <label>Bearer in request:</label>
+        <select id="headers"  size="3" onchange="copyToInput()" ></select>
+    </div>
+
+    <div id="refreshTokens">
+        <label>Url:</label>
+        <select id="urlList" size="3"  onclick="displayRequestDetails()"  onchange="displayRequestDetails()"></select>
+        <label>Request:</label>
+        <textarea id="requestDetails" rows="10" cols="50"  style="width: 980px; height: 157px;"></textarea>
+        <br>
+        <button id="requestButton" onclick="replayRequest()">Replay Request to Generate Access Token</button>
+        <br>
+        <textarea id="responseArea" rows="10" cols="50" style="width: 980px; height: 157px;" ></textarea>
+    </div>
+
+
+
+	
+    <!-- Token Input -->
+    <label for="token">Access Token:</label>
+    <input type="text" id="token" name="token" required>
+    <button id="parseTokenButton">Parse Token</button>
+    <button id="clearTokenButton">Clear Token</button>
+    <pre class="response" id="jwtFields"></pre>
+    
+
+    <hr>
+
+    <!-- API Request Form -->
+    <h2>Custom API Request</h2>
+    <form id="apiRequestForm">
+    <label for="apiEndpoint">API Endpoint:</label>
+    <input type="text" id="apiEndpoint" name="apiEndpoint" value="https://graph.microsoft.com/v1.0/me" required>
+
+    <!-- Dropdown for HTTP Method -->
+    <label for="httpMethod">HTTP Method:</label>
+    <select id="httpMethod" name="httpMethod">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="OPTIONS">OPTIONS</option>
+    </select>
+
+    <!-- Additional input for POST/PUT request body -->
+    <label for="requestBody" id="requestBodyLabel">Request Body:</label>
+    <textarea id="requestBody" name="requestBody" rows="4"></textarea>
+
+    <button type="submit">Send Request</button>
+    </form>
+
+    <pre class="response" id="apiResponse"></pre>
+    <hr>
+
+
+
+    <!-- List All Users Button -->
+    <h2>Directory - Users</h2>
+    <p><strong>Required Perms:</strong> User.ReadBasic.All, User.Read.All, User.ReadWrite.All, Directory.Read.All, or Directory.ReadWrite.All</p>
+    <button id="listUsersButton">List Users</button>
+    <button id="exportUsersButton">Export</button> 
+    <button id="FullUsers">Export Users Data (json)</button> 
+    <button id="MFAUsers">Check MFA Anomaly</button> 
+    <button id="MFAUsersDownload">Export MFA NotEnabled Users</button> 
+    <pre class="response" id="listUsersResponse"></pre>
+    <hr>
+
+    <div id="groupExplorerContainer" class="group-explorer">
+    <div class="group-explorer-header">
+      
+
+    <h2>Directory - Groups</h2>
+     <p><strong>Required Perms:</strong> GroupMember.Read.All, Group.Read.All, Directory.Read.All, Group.ReadWrite.All, or Directory.ReadWrite.All</p>
+    <button id="listGroupsButton">List Groups</button>
+    <button id="exportButton">Export</button>
+    </div>
+    <div id="groupList" class="group-list"></div>
+    <div id="groupMembers" class="group-members"></div>
+    </div>
+
+
+    <!-- Email Viewer -->
+
+    <h2>Email Viewer (Current User)</h2>
+    <p><strong>Required Perms:</strong> Mail.ReadBasic, Mail.Read, or Mail.ReadWrite</p>
+    <button id="fetchEmailsButton">Fetch Emails</button>
+    <button id="exportEmailsButton">Export</button>
+    <button id="searchButton" class="search-button">Search</button>
+    <br></br>
+    <div class="email-controls">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search emails...">
+    
+    </div>
+    <div class="email-list" id="emailList"></div>
+    <div class="email-detail" id="emailDetail"></div>
+    <hr>
+
+    <!-- Other User Email Viewer -->
+    <h2>Email Viewer (Other Users)</h2>
+    <p><strong>Required Perms:</strong> Mail.Read.Shared or Mail.ReadWrite.Shared</p>
+    <form id="customEmailViewerForm">
+        <label for="customUserId">User ID:</label>
+        <br>
+        <input type="text" id="customUserId" name="customUserId" required>
+        <br></br>
+        <label for="customFolder">Folder:</label>
+        <br>
+        <input type="text" id="customFolder" name="customFolder" value="Inbox" required>
+        <br></br>
+        <button type="submit">Fetch Emails</button>
+    </form>
+    <div id="customEmailList"></div>
+    <div id="customEmailDetail"></div>
+    <hr>
+
+    <!-- Send Email Form -->
+    <h2>Send Email</h2>
+    <p><strong>Required Perms:</strong> Mail.Send</p>
+    <form id="sendEmailForm">
+        <label for="to">To:</label>
+        <input type="text" id="to" name="to" required>
+        <label for="subject">Subject:</label>
+        <input type="text" id="subject" name="subject" required>
+        <label for="body">Body:</label>
+        <textarea id="body" name="body" rows="4" required></textarea>
+        <label for="attachments">Attachments:</label>
+        <input type="file" id="attachments" name="attachments" multiple>
+        <button type="submit">Send Email</button>
+    </form>
+    <div id="emailSuccessMessage"></div>
+    <div id="emailErrorMessage"></div>
+    <hr>
+
+    <!-- Button to Fetch Teams Chats -->
+    <h2>Teams Chat Viewer (Direct Messages and Group Chat)</h2>
+    <p><strong>Required Perms:</strong> Chat.ReadBasic, Chat.Read, or Chat.ReadWrite</p>
+    <div id="chatViewer">
+    <!-- Fetch Chats Button -->
+    <button id="fetchChatsButton">Fetch Teams Chats</button>
+    <!-- Chat List -->
+    <div id="chatList" class="item-list"></div>
+    <!-- Chat Messages -->
+    <div id="chatMessages" class="item-list"></div>
+    <!-- Send Message Form -->
+    <h4>Send Message to Teams Chat:</h4>
+    <p><strong>Required Perms:</strong> ChatMessage.Send or Chat.ReadWrite</p>
+    <input type="text" id="messageTextBox" placeholder="Type your message...">
+    <button id="sendMessageButton">Send Message</button>
+    </div>
+    <hr>
+
+    <!-- List Public Teams Chats -->
+    <h2>Teams Chat Viewer (Org Teams Channels)</h2>
+    <p><strong>Required Perms:</strong> Team.ReadBasic.All, TeamSettings.Read.All, TeamSettings.ReadWrite.All, User.RemailsForExportead.All, or User.ReadWrite.All</p>
+    <button id="listPublicChatsButton">List Channels</button>
+    <div id="publicChatList"></div>
+    <!-- Chat Messages -->
+    <div id="publicChatMessages"></div>
+    <hr>
+
+
+    <!-- List OneDrive Files and Folders -->
+    <h2>OneDrive My Files</h2>
+    <p><strong>Required Perms:</strong> Files.Read, Files.ReadWrite, Files.Read.All, Files.ReadWrite.All, Sites.Read.All, or Sites.ReadWrite.All</p>
+    <button id="listFilesButton">List Files</button>
+    <div id="fileList"></div>
+    <hr>
+    
+    <!-- List OneDrive Shared Files -->
+    <h2>OneDrive Shared Files</h2>
+    <p><strong>Required Perms:</strong> Files.Read, Files.ReadWrite, Files.Read.All, Files.ReadWrite.All, Sites.Read.All, or Sites.ReadWrite.All</p>
+    <button id="listSharedFilesButton">List Shared Files</button>
+    <div id="sharedFileList"></div>
+    <hr>
+
+
+    <!-- List SharePoint Files and Folders -->
+    <h2>SharePoint</h2>
+    <p><strong>Required Perms:</strong>Sites.Read.All or Sites.ReadWrite.All AND Files.Read, Files.ReadWrite, Files.Read.All, or Files.ReadWrite.All</p>
+    <button id="listDrivesButton">List SharePoint Root Drives</button>
+    <h4>Drive List</h4>
+    <div id="driveList"></div>
+    <h4>Files and Folders</h4>
+    <div id="sharePointDriveFileList"></div>
+    <br>
+    <button id="listSitesButton">List SharePoint Sites</button>
+    <h4>Site List</h4>
+    <div id="siteList"></div>
+    <h4>Files and Folders</h4>
+    <div id="sharePointfileList"></div>
+    <hr>
+
+    </div>
+
+
+
+ <script>
+    const tokenInput = document.getElementById('token');
+    const apiRequestForm = document.getElementById('apiRequestForm');
+    const apiResponse = document.getElementById('apiResponse');
+    const fetchEmailsButton = document.getElementById('fetchEmailsButton');
+    const emailList = document.getElementById('emailList');
+    const emailDetail = document.getElementById('emailDetail');
+    const sendEmailForm = document.getElementById('sendEmailForm');
+    const sendEmailResponse = document.getElementById('sendEmailResponse');
+    const FileReader = window.FileReader;
+    let myData = []; 
+    let mergedData = []; 
+
+    // CUSTOM GRAPH API QUERY
+    apiRequestForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const token = tokenInput.value;
+    const apiEndpoint = document.getElementById('apiEndpoint').value;
+    const httpMethod = document.getElementById('httpMethod').value;
+
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    // Check if POST or PUT method selected
+    let requestBody = null;
+    if (httpMethod === 'POST' || httpMethod === 'PUT') {
+        requestBody = document.getElementById('requestBody').value;
+        headers['Content-Type'] = 'application/json';
+    }
+
+    try {
+        const requestOptions = {
+            method: httpMethod,
+            headers
+        };
+
+        if (requestBody) {
+            requestOptions.body = requestBody; 
+        }
+
+        const response = await fetch(apiEndpoint, requestOptions);
+        const data = await response.json();
+
+        apiResponse.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            apiResponse.textContent = 'Error: ' + error.message;
+        }
+    });
+
+    //MAIL - VIEWER
+    // Function to export emails to a CSV file
+    function exportEmailsToCSV(emails) {
+    const csvContent = [
+        'From,To,Subject,Date,Body'
+    ];
+
+    emails.forEach(email => {
+        const from = email.from.emailAddress.name + ' (' + email.from.emailAddress.address + ')';
+        const to = email.toRecipients.map(recipient => recipient.emailAddress.address).join(', ');
+        const subject = email.subject;
+        const date = new Date(email.sentDateTime).toLocaleString();
+        const body = email.bodyPreview;
+
+        csvContent.push(`"${from}","${to}","${subject}","${date}","${body}"`);
+    });
+
+    const csvText = csvContent.join('\n');
+    const blob = new Blob([csvText], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'emails.csv';
+    a.click();
+    }
+
+    // Fetch and display emails
+    fetchEmailsButton.addEventListener('click', async function() {
+        const token = tokenInput.value;
+        const apiEndpoint = 'https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages';
+
+        const headers = {
+            'Authorization': `Bearer ${token}`
+        };
+
+        try {
+            const response = await fetch(apiEndpoint, { headers });
+            const data = await response.json();
+
+            emailList.innerHTML = '';
+            data.value.forEach(email => {
+                const emailSummary = `
+                    <div class="email-summary" data-id="${email.id}">
+                        <strong>From:</strong> ${email.from.emailAddress.name} (${email.from.emailAddress.address})<br>
+                        <strong>Subject:</strong> ${email.subject}<br>
+                        <strong>Date:</strong> ${new Date(email.sentDateTime).toLocaleString()}<br>
+                        <strong>Preview:</strong> ${email.bodyPreview}<br>
+                    </div>
+                    <hr>
+                `;
+                emailList.innerHTML += emailSummary;
+            });
+
+            // MAIL VIEWER - Event listener for email summaries
+            const emailSummaries = document.querySelectorAll('.email-summary');
+            emailSummaries.forEach(emailSummary => {
+                emailSummary.addEventListener('click', async () => {
+                    const emailId = emailSummary.getAttribute('data-id');
+                    const emailDetailEndpoint = `https://graph.microsoft.com/v1.0/me/messages/${emailId}`;
+                    try {
+                        const emailDetailResponse = await fetch(emailDetailEndpoint, { headers });
+                        const emailDetailData = await emailDetailResponse.json();
+
+                        emailDetail.innerHTML = `
+                            <h3>Email Details</h3>
+                            <strong>From:</strong> ${emailDetailData.from.emailAddress.name} (${emailDetailData.from.emailAddress.address})<br>
+                            <strong>Subject:</strong> ${emailDetailData.subject}<br>
+                            <strong>Date:</strong> ${new Date(emailDetailData.sentDateTime).toLocaleString()}<br>
+                            <strong>Body:</strong> ${emailDetailData.body.content}
+                        `;
+                    } catch (error) {
+                        emailDetail.innerHTML = `Error fetching email details: ${error.message}`;
+                    }
+                });
+            });
+        // Store email data for exporting
+        window.emailsForExport = data.value;
+        } catch (error) {
+            emailList.innerHTML = `Error fetching emails: ${error.message}`;
+        }
+        
+    });
+
+    // Export Emails
+    exportEmailsButton.addEventListener('click', function() {
+    if (window.emailsForExport) {
+        exportEmailsToCSV(window.emailsForExport);
+    } else {
+        alert('No email data available for export.');
+    }
+    });
+
+
+    // Search Emails
+    searchButton.addEventListener('click', async function() {
+    const token = tokenInput.value;
+    const searchInput = document.getElementById('searchInput').value.trim();
+
+    if (searchInput) {
+        const apiEndpoint = `https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$search="${searchInput}"`;
+
+        const headers = {
+            'Authorization': `Bearer ${token}`
+        };
+
+        try {
+            const response = await fetch(apiEndpoint, { headers });
+            const data = await response.json();
+
+            // Store search results for exporting
+            window.emailsForExport = data.value;
+
+            // Call displayEmails with search results and headers
+            displayEmails(data.value, headers);
+        } catch (error) {
+            emailList.innerHTML = `Error searching emails: ${error.message}`;
+        }
+    } else {
+        alert('Please enter a search term.');
+    }
+    });
+
+
+    // Function to search display emails
+    function displayEmails(emails, headers) {
+    emailList.innerHTML = '';
+
+    emails.forEach(email => {
+        const emailSummary = `
+            <div class="email-summary" data-id="${email.id}">
+                <strong>From:</strong> ${email.from.emailAddress.name} (${email.from.emailAddress.address})<br>
+                <strong>Subject:</strong> ${email.subject}<br>
+                <strong>Date:</strong> ${new Date(email.sentDateTime).toLocaleString()}<br>
+                <strong>Preview:</strong> ${email.bodyPreview}<br>
+            </div>
+        `;
+        emailList.innerHTML += emailSummary;
+    });
+
+    // Add event listener for email summaries
+    const emailSummaries = document.querySelectorAll('.email-summary');
+    emailSummaries.forEach(emailSummary => {
+        emailSummary.addEventListener('click', async () => {
+            const emailId = emailSummary.getAttribute('data-id');
+            const emailDetailEndpoint = `https://graph.microsoft.com/v1.0/me/messages/${emailId}`;
+            try {
+                const emailDetailResponse = await fetch(emailDetailEndpoint, { headers });
+                const emailDetailData = await emailDetailResponse.json();
+
+                emailDetail.innerHTML = `
+                    <h3>Email Details</h3>
+                    <strong>From:</strong> ${emailDetailData.from.emailAddress.name} (${emailDetailData.from.emailAddress.address})<br>
+                    <strong>Subject:</strong> ${emailDetailData.subject}<br>
+                    <strong>Date:</strong> ${new Date(emailDetailData.sentDateTime).toLocaleString()}<br>
+                    <strong>Body:</strong> ${emailDetailData.body.content}
+                `;
+            } catch (error) {
+                emailDetail.innerHTML = `Error fetching email details: ${error.message}`;
+            }
+        });
+    });
+    }
+        
+
+
+    function downloadMFAUsers(text, filename) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    }
+
+
+
+    // LIST USERS
+    // Function to export users to a text file
+    function exportUsersToFile(users) {
+    const userText = users.join('\n');
+
+    const blob = new Blob([userText], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'users.txt';
+    a.click();
+    }
+
+    // List Users
+    listUsersButton.addEventListener('click', async function() {
+   
+    const token = tokenInput.value;
+    try {
+        const allUsers = await fetchAllUsers(token);
+        
+        // Display userPrincipalName fields only
+        const userPrincipalNames = allUsers.map(user => user.userPrincipalName);
+        listUsersResponse.textContent = userPrincipalNames.join('\n');
+
+        // Store userPrincipalNames for exporting
+        window.userPrincipalNamesForExport = userPrincipalNames;
+    } catch (error) {
+        listUsersResponse.textContent = 'Error: ' + error.message;
+    }
+    });
+
+    // Function to fetch all users using pagination
+    async function fetchAllUsers(token) {
+    const initialUrl = 'https://graph.microsoft.com/v1.0/users';
+
+    let allUsers = [];
+
+    let url = initialUrl;
+
+    while (url) {
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.value) {
+            allUsers = allUsers.concat(data.value);
+        }
+
+        url = data['@odata.nextLink'];
+    }
+
+    return allUsers;
+    }
+
+    // Export Users
+    exportUsersButton.addEventListener('click', function() {
+    if (window.userPrincipalNamesForExport) {
+        exportUsersToFile(window.userPrincipalNamesForExport);
+    } else {
+        alert('No user data available for export.');
+    }
+    });
+
+    // Users list clear
+    FullUsers.addEventListener('click', function() {
+        getUsersDataFull();
+    });
+    MFAUsers.addEventListener('click', function() {
+        document.getElementById('listUsersResponse').textContent = '';
+        testMergedData();
+    });
+    // document.getElementById('MFAUsersDownload').addEventListener('click', () => {
+    //     downloadMFAUsers(window.mfaNotEnabledUsers, 'mfaNotEnabledUsers.txt');
+    // });
+    MFAUsersDownload.addEventListener('click', function() {
+        if (window.mfaNotEnabledUsers.length > 5) {
+                downloadMFAUsers(window.mfaNotEnabledUsers, 'mfaNotEnabledUsers.txt'); 
+        } else {        
+            alert('No user data available for export.');  
+        }
+    });
+
+
+// DIRECTORY GROUPS
+const groupApiEndpoint = 'https://graph.microsoft.com/v1.0/groups';
+
+// Function to list groups
+async function listGroups(token) {
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(groupApiEndpoint, { headers });
+        const data = await response.json();
+        return data.value;
+    } catch (error) {
+        console.error('Error listing groups:', error);
+        return [];
+    }
+}
+
+// Function to generate group list
+function generateGroupList(parentNode, groups) {
+    const ul = document.createElement('ul');
+    parentNode.appendChild(ul);
+
+    groups.forEach(group => {
+        const li = document.createElement('li');
+        ul.appendChild(li);
+
+        const groupNode = document.createElement('div');
+        groupNode.classList.add('group-node');
+        groupNode.textContent = group.displayName;
+        li.appendChild(groupNode);
+
+        groupNode.addEventListener('click', async () => {
+            const members = await fetchGroupMembers(group.id, tokenInput.value);
+            showGroupMembers(members);
+        });
+    });
+}
+
+// Function to fetch group members
+async function fetchGroupMembers(groupId, token) {
+    const membersApiEndpoint = `https://graph.microsoft.com/v1.0/groups/${groupId}/members`;
+
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(membersApiEndpoint, { headers });
+        const data = await response.json();
+        return data.value;
+    } catch (error) {
+        console.error('Error fetching group members:', error);
+        return [];
+    }
+}
+
+// Function to display group members
+function showGroupMembers(members) {
+    const groupMembersContainer = document.getElementById('groupMembers');
+    groupMembersContainer.innerHTML = '';
+
+    const membersList = document.createElement('ul');
+    groupMembersContainer.appendChild(membersList);
+
+    members.forEach(member => {
+        const memberItem = document.createElement('li');
+        memberItem.innerHTML = `<strong>Name:</strong> ${member.displayName}<br><strong>Email:</strong> ${member.userPrincipalName}<br><strong>ID:</strong> ${member.id}`;
+        membersList.appendChild(memberItem);
+    });
+}
+
+// List Groups button click event
+const listGroupsButton = document.getElementById('listGroupsButton');
+const groupList = document.getElementById('groupList');
+
+listGroupsButton.addEventListener('click', async () => {
+    groupList.innerHTML = ''; // Clear existing content
+    const groups = await listGroups(tokenInput.value); // Replace with your token retrieval logic
+    generateGroupList(groupList, groups);
+});
+
+
+function exportGroupMembersToCSV(members) {
+    // Create CSV content
+    let csvContent = "ID,Name,Email\n";
+    members.forEach(member => {
+        csvContent += `${member.id},${member.displayName},${member.userPrincipalName}\n`;
+    });
+
+    // Create a Blob containing the CSV content
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+
+    // Create a download link for the Blob
+    const downloadLink = document.createElement('a');
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = 'group_members.csv';
+    downloadLink.click();
+
+    // Revoke the object URL to free up resources
+    URL.revokeObjectURL(downloadLink.href);
+}
+
+// Attach export button click event
+const exportButton = document.getElementById('exportButton');
+    exportButton.addEventListener('click', async function () {
+        const displayedGroupMembers = await fetchDisplayedGroupMembers();
+        if (displayedGroupMembers.length > 0) {
+            exportGroupMembersToCSV(displayedGroupMembers);
+        } else {
+            alert('No group members data available for export.');
+        }
+    });
+
+    // Function to fetch the currently displayed group's members
+    async function fetchDisplayedGroupMembers() {
+    const groupMembersContainer = document.getElementById('groupMembers');
+    const memberItems = groupMembersContainer.getElementsByTagName('li');
+    const token = tokenInput.value;
+
+    const members = [];
+    for (const memberItem of memberItems) {
+        const name = memberItem.querySelector('strong:nth-child(1)').textContent.split(':')[1].trim();
+        const email = memberItem.querySelector('strong:nth-child(2)').textContent.split(':')[1].trim();
+        const id = memberItem.querySelector('strong:nth-child(3)').textContent.split(':')[1].trim();
+
+        members.push({ id, displayName: name, userPrincipalName: email });
+    }
+
+    return members;
+}
+
+
+
+    // MAIL - CUSTOM EMAIL VIEWER
+    const customEmailViewerForm = document.getElementById('customEmailViewerForm');
+            const customEmailList = document.getElementById('customEmailList');
+            const customEmailDetail = document.getElementById('customEmailDetail');
+
+            customEmailViewerForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                const token = tokenInput.value;
+                const customUserId = document.getElementById('customUserId').value;
+                const customFolder = document.getElementById('customFolder').value;
+
+                const customApiEndpoint = `https://graph.microsoft.com/v1.0/users/${customUserId}/mailFolders/${customFolder}/messages`;
+
+                const headers = {
+                    'Authorization': `Bearer ${token}`
+                };
+
+                try {
+                    const response = await fetch(customApiEndpoint, { headers });
+                    const data = await response.json();
+
+                    customEmailList.innerHTML = '';
+                    data.value.forEach(email => {
+                        const customEmailSummary = `
+                            <div class="email-summary" data-id="${email.id}">
+                                <strong>From:</strong> ${email.sender ? `${email.sender.emailAddress.name} (${email.sender.emailAddress.address})` : 'Unknown'}<br>
+                                <strong>Subject:</strong> ${email.subject}<br>
+                                <strong>Date:</strong> ${new Date(email.sentDateTime).toLocaleString()}<br>
+                                <strong>Preview:</strong> ${email.bodyPreview}<br>
+                            </div>
+                            <hr>
+                        `;
+                        customEmailList.innerHTML += customEmailSummary;
+                    });
+
+                    // MAIL - CUSTOM EMAIL VIEWER - Add event listener to custom email summaries
+                    const customEmailSummaries = document.querySelectorAll('.email-summary');
+                    customEmailSummaries.forEach(customEmailSummary => {
+                        customEmailSummary.addEventListener('click', async () => {
+                            const customEmailId = customEmailSummary.getAttribute('data-id');
+                            const customEmailDetailEndpoint = `https://graph.microsoft.com/v1.0/users/${customUserId}/messages/${customEmailId}`;
+                            try {
+                                const customEmailDetailResponse = await fetch(customEmailDetailEndpoint, { headers });
+                                const customEmailDetailData = await customEmailDetailResponse.json();
+
+                                customEmailDetail.innerHTML = `
+                                    <h3>Email Details</h3>
+                                    <strong>From:</strong> ${customEmailDetailData.sender ? `${customEmailDetailData.sender.emailAddress.name} (${customEmailDetailData.sender.emailAddress.address})` : 'Unknown'}<br>
+                                    <strong>Subject:</strong> ${customEmailDetailData.subject}<br>
+                                    <strong>Date:</strong> ${new Date(customEmailDetailData.sentDateTime).toLocaleString()}<br>
+                                    <strong>Body:</strong> ${customEmailDetailData.body.content}
+                                `;
+                            } catch (error) {
+                                customEmailDetail.innerHTML = `Error fetching email details: ${error.message}`;
+                            }
+                        });
+                    });
+                } catch (error) {
+                    customEmailList.innerHTML = `Error fetching emails: ${error.message}`;
+                }
+            });
+
+    // MAIL SEND - Form
+   sendEmailForm.addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const token = tokenInput.value;
+    const to = document.getElementById('to').value;
+    const subject = document.getElementById('subject').value;
+    const body = document.getElementById('body').value;
+
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+
+    // MAIL SEND - Attachments
+    const attachmentsInput = document.getElementById('attachments');
+    const attachments = attachmentsInput.files;
+
+    const emailMessage = {
+        message: {
+            subject,
+            body: {
+                contentType: 'Text',
+                content: body
+            },
+            toRecipients: [
+                {
+                    emailAddress: {
+                        address: to
+                    }
+                }
+            ],
+            attachments: [] // Initialize an empty array for attachments
+        },
+        saveToSentItems: false
+    };
+
+    for (const attachment of attachments) {
+        const attachmentPayload = {
+            '@odata.type': '#microsoft.graph.fileAttachment',
+            contentBytes: '',
+            contentType: attachment.type,
+            name: attachment.name
+        };
+
+        // Read the attachment content as base64 and assign it to the payload
+        const attachmentContent = await readFileAsBase64(attachment);
+        attachmentPayload.contentBytes = attachmentContent;
+
+        emailMessage.message.attachments.push(attachmentPayload);
+    }
+
+    try {
+        // MAIL SEND - Use fetch to send the email and handle the response
+        const sendEmailResponse = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(emailMessage)
+        });
+
+        if (sendEmailResponse.status === 202) {
+            // Email sent successfully
+            const successMessage = document.getElementById('emailSuccessMessage');
+            successMessage.textContent = 'Message Sent Successfully. It is being processed.';
+        } else {
+            // Error sending email
+            const errorMessage = document.getElementById('emailErrorMessage');
+            errorMessage.textContent = 'Error sending email: Unexpected response.';
+        }
+    } catch (error) {
+        // Error in fetch or sending email
+        const errorMessage = document.getElementById('emailErrorMessage');
+        errorMessage.textContent = `Error sending email: ${error.message}`;
+    }
+});
+
+
+// TEAMS -Event listener for the "Fetch Teams Chats" button
+const fetchChatsButton = document.getElementById('fetchChatsButton');
+fetchChatsButton.addEventListener('click', listChats);
+
+// TEAMS -  Function to fetch and display list of chats
+async function listChats() {
+    const token = tokenInput.value;
+    const apiEndpoint = 'https://graph.microsoft.com/v1.0/me/chats';
+
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(apiEndpoint, { headers });
+        const data = await response.json();
+
+        const chatList = document.getElementById('chatList');
+        chatList.innerHTML = '';
+
+        data.value.forEach(chat => {
+            const chatSummary = `
+                <div class="chat-summary" data-id="${chat.id}">
+                    <strong>Teams Chat Conversation:</strong> ${chat.lastUpdatedDateTime}
+                </div>
+            `;
+            chatList.innerHTML += chatSummary;
+        });
+
+        // Add event listener to chat summaries
+        const chatSummaries = document.querySelectorAll('.chat-summary');
+        chatSummaries.forEach(chatSummary => {
+        chatSummary.addEventListener('click', async () => {
+        const chatId = chatSummary.getAttribute('data-id');
+        await fetchAndDisplayChatMessages(chatId, headers);
+        // Update chat ID for sending messages
+        sendMessageButton.setAttribute('data-chat-id', chatId);
+            });
+        });
+    } catch (error) {
+        chatList.innerHTML = `Error fetching chats: ${error.message}`;
+    }
+}
+
+// TEAMS - Function to fetch and display chat messages
+async function fetchAndDisplayChatMessages(chatId, headers) {
+    const chatMessagesEndpoint = `https://graph.microsoft.com/v1.0/me/chats/${chatId}/messages`;
+
+    try {
+        const response = await fetch(chatMessagesEndpoint, { headers });
+        const data = await response.json();
+
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = '';
+
+        // Reverse the order of messages to display the latest message at the bottom
+        const reversedMessages = data.value.reverse();
+
+        for (const message of reversedMessages) {
+            const senderDisplayName = message.from && message.from.user && message.from.user.displayName ? message.from.user.displayName : "Unknown User";
+            const senderUserId = message.from && message.from.user && message.from.user.id ? message.from.user.id : "Unknown ID";
+            const createdDateTime = new Date(message.createdDateTime).toLocaleString();
+
+            let messageContent = '';
+
+            if (message.body && message.body.contentType === 'html') {
+                messageContent = message.body.content;
+                const imageUrls = extractImageUrls(messageContent);
+
+                // Display extracted images
+                for (const imageUrl of imageUrls) {
+                    const imageData = await fetch(imageUrl, { headers });
+                    if (imageData.ok) {
+                        const imageBlob = await imageData.blob();
+                        const imageUrlObject = URL.createObjectURL(imageBlob);
+                        messageContent += `<br><img src="${imageUrlObject}" alt="Image" style="max-width: 100%; height: auto;"><br>`;
+                    }
+                }
+            } else if (message.body && message.body.content) {
+                messageContent = message.body.content;
+            }
+
+            const attachments = message.attachments || [];
+            attachments.forEach(attachment => {
+                if (attachment.contentType === 'image/png' || attachment.contentType === 'image/jpeg') {
+                    // Display image attachment
+                    const imageSrc = attachment.contentUrl;
+                    messageContent += `<br><img class="message-image" src="${imageSrc}" alt="Attachment">`;
+                } else {
+                    // Display other file attachment
+                    const fileSrc = attachment.contentUrl;
+                    const fileName = attachment.name;
+                    messageContent += `<br><a href="${fileSrc}" target="_blank">${fileName}</a>`;
+                }
+            });
+
+            const messageDetail = `
+                <div class="message">
+                    <div class="message-header">
+                        <strong>${senderDisplayName} (${senderUserId})</strong> - ${createdDateTime}
+                    </div>
+                    <div class="message-content">
+                        ${messageContent}
+                    </div>
+                </div>
+                <hr>
+            `;
+            chatMessages.innerHTML += messageDetail;
+        }
+    } catch (error) {
+        chatMessages.innerHTML = `Error fetching chat messages: ${error.message}`;
+    }
+}
+
+function extractImageUrls(htmlContent) {
+    const imageUrls = [];
+    const imageRegex = /<img[^>]+src="([^">]+)"/g;
+    let match = imageRegex.exec(htmlContent);
+    while (match !== null) {
+        imageUrls.push(match[1]);
+        match = imageRegex.exec(htmlContent);
+    }
+    return imageUrls;
+}
+
+// TEAMS - Send Message Functionality
+const sendMessageButton = document.getElementById('sendMessageButton');
+const messageTextBox = document.getElementById('messageTextBox');
+
+sendMessageButton.addEventListener('click', async () => {
+    const message = messageTextBox.value;
+    if (message) {
+        const chatId = sendMessageButton.getAttribute('data-chat-id');
+        await sendMessageToChat(chatId, message);
+    }
+});
+
+// TEAMS - SEND 
+async function sendMessageToChat(chatId, message) {
+    const token = tokenInput.value;
+    const sendMessageUrl = `https://graph.microsoft.com/v1.0/me/chats/${chatId}/messages`;
+
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+
+    const messagePayload = {
+        body: {
+            content: message
+        }
+    };
+
+    try {
+        const response = await fetch(sendMessageUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(messagePayload)
+        });
+
+        if (response.status === 201) {
+            // Message sent successfully
+            console.log('Message sent successfully');
+        } else {
+            // Handle error response
+            console.error('Error sending message:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error sending message:', error.message);
+    }
+}
+
+
+// TEAMS - PUBLIC Add event listener for listing public Teams chats
+const listPublicChatsButton = document.getElementById('listPublicChatsButton');
+listPublicChatsButton.addEventListener('click', listPublicChats);
+
+// TEAMS - PUBLIC Function to fetch and display public Teams chats
+async function listPublicChats() {
+    const token = tokenInput.value;
+    const apiEndpoint = 'https://graph.microsoft.com/v1.0/me/joinedTeams';
+
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(apiEndpoint, { headers });
+        const data = await response.json();
+
+        const publicChatList = document.getElementById('publicChatList');
+        publicChatList.innerHTML = '';
+
+        data.value.forEach(async team => {
+            const teamChatsEndpoint = `https://graph.microsoft.com/v1.0/teams/${team.id}/channels`;
+
+            try {
+                const chatsResponse = await fetch(teamChatsEndpoint, { headers });
+                const chatsData = await chatsResponse.json();
+
+                chatsData.value.forEach(chat => {
+                    if (chat.displayName) {
+                        const chatSummary = `
+                            <div class="public-chat-summary" data-id="${chat.id}">
+                                <strong>Public Chat Name:</strong> ${chat.displayName}<br>
+                                <strong>Description:</strong> ${chat.description || 'No description available'}<br>
+                            </div>
+                            <hr>
+                        `;
+                        publicChatList.innerHTML += chatSummary;
+                    }
+                });
+            } catch (error) {
+                publicChatList.innerHTML = `Error fetching chats: ${error.message}`;
+            }
+        });
+
+        // Add event listener to public chat summaries
+        const publicChatSummaries = document.querySelectorAll('.public-chat-summary');
+        publicChatSummaries.forEach(chatSummary => {
+            chatSummary.addEventListener('click', async () => {
+                const chatId = chatSummary.getAttribute('data-id');
+                await fetchAndDisplayPublicChatMessages(chatId, headers);
+                // Update chat ID for sending messages
+                sendMessageButton.setAttribute('data-chat-id', chatId);
+            });
+        });
+    } catch (error) {
+        publicChatList.innerHTML = `Error fetching public chats: ${error.message}`;
+    }
+}
+
+// TEAMS - PUBLIC Function to fetch and display chat messages
+async function fetchAndDisplayPublicChatMessages(chatId, headers) {
+    const chatMessagesEndpoint = `https://graph.microsoft.com/v1.0/teams/${chatId}/messages`;
+
+    try {
+        const response = await fetch(chatMessagesEndpoint, { headers });
+        const data = await response.json();
+
+        const publicChatMessages = document.getElementById('publicChatMessages');
+        publicChatMessages.innerHTML = '';
+
+        data.value.forEach(message => {
+            const senderDisplayName = message.from && message.from.user && message.from.user.displayName ? message.from.user.displayName : "Unknown User";
+            const messageContent = message.body && message.body.content ? message.body.content : "No content available";
+            const createdDateTime = new Date(message.createdDateTime).toLocaleString();
+
+            const messageDetail = `
+                <div>
+                    <strong>From:</strong> ${senderDisplayName}<br>
+                    <strong>Message:</strong> ${messageContent}<br>
+                    <strong>Created:</strong> ${createdDateTime}<br>
+                </div>
+                <hr>
+            `;
+            publicChatMessages.innerHTML += messageDetail;
+        });
+    } catch (error) {
+        publicChatMessages.innerHTML = `Error fetching chat messages: ${error.message}`;
+    }
+}
+
+// ONEDRIVE -  List Files
+const listFilesButton = document.getElementById('listFilesButton');
+const fileList = document.getElementById('fileList');
+
+listFilesButton.addEventListener('click', async function () {
+    const token = tokenInput.value;
+    const apiEndpoint = 'https://graph.microsoft.com/v1.0/me/drive/root/children';
+
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(apiEndpoint, { headers });
+        const data = await response.json();
+
+        fileList.innerHTML = '';
+
+        data.value.forEach(file => {
+            const fileCard = document.createElement('div');
+            fileCard.classList.add('file-card');
+
+            const fileName = document.createElement('div');
+            fileName.classList.add('file-name');
+            fileName.textContent = file.name;
+            fileCard.appendChild(fileName);
+
+            const fileDetails = document.createElement('div');
+            fileDetails.classList.add('file-details');
+            fileDetails.innerHTML = `
+                <strong>Size:</strong> ${file.size ? `${file.size} bytes` : 'N/A'}
+                <strong>Type:</strong> ${file.file ? 'File' : 'Folder'}
+                <a href="#" class="${file.file ? 'download-link' : 'folder-link'}" data-id="${file.id}">
+                    ${file.file ? 'Download' : 'Open Folder'}
+                </a>
+            `;
+            fileCard.appendChild(fileDetails);
+
+            fileList.appendChild(fileCard);
+
+            const link = fileDetails.querySelector('.download-link, .folder-link');
+            link.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const itemId = link.getAttribute('data-id');
+                if (file.file) {
+                    await downloadFile(itemId, headers);
+                } else {
+                    await fetchAndDisplayFolderContents(itemId, headers);
+                }
+            });
+        });
+    } catch (error) {
+        fileList.innerHTML = `Error fetching files and folders: ${error.message}`;
+    }
+});
+
+
+// ONEDRIVE - Function to download a file
+async function downloadFile(fileId, headers) {
+    // Construct the download URL
+    const downloadUrl = `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/content`;
+
+    try {
+        const response = await fetch(downloadUrl, { headers });
+        const blob = await response.blob();
+
+        // Create a temporary anchor element to initiate download
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileId;
+        a.click();
+    } catch (error) {
+        fileList.innerHTML = `Error downloading file: ${error.message}`;
+    }
+}
+
+// ONEDRIVE - Function to fetch and display folder contents
+async function fetchAndDisplayFolderContents(folderId, headers) {
+    const folderContentsUrl = `https://graph.microsoft.com/v1.0/me/drive/items/${folderId}/children`;
+
+    try {
+        const response = await fetch(folderContentsUrl, { headers });
+        const data = await response.json();
+
+        fileList.innerHTML = '';
+        data.value.forEach(item => {
+            const fileCard = document.createElement('div');
+            fileCard.classList.add('file-card');
+
+            const itemName = document.createElement('div');
+            itemName.classList.add('item-name');
+            itemName.textContent = item.name;
+            fileCard.appendChild(itemName);
+
+            const itemDetails = document.createElement('div');
+            itemDetails.classList.add('item-details');
+            itemDetails.innerHTML = `
+                <strong>Size:</strong> ${item.size ? `${item.size} bytes` : 'N/A'}
+                <strong>Type:</strong> ${item.file ? 'File' : 'Folder'}
+                <a href="#" class="${item.file ? 'download-link' : 'folder-link'}" data-id="${item.id}">
+                    ${item.file ? 'Download' : 'Open Folder'}
+                </a>
+            `;
+            fileCard.appendChild(itemDetails);
+
+            fileList.appendChild(fileCard);
+
+            const link = itemDetails.querySelector('.download-link, .folder-link');
+            link.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const itemId = link.getAttribute('data-id');
+                if (item.file) {
+                    await downloadFile(itemId, headers);
+                } else {
+                    await fetchAndDisplayFolderContents(itemId, headers);
+                }
+            });
+        });
+    } catch (error) {
+        fileList.innerHTML = `Error fetching folder contents: ${error.message}`;
+    }
+}
+
+// ONEDRIVE SHARED FILES
+const listSharedFilesButton = document.getElementById('listSharedFilesButton');
+const sharedFileList = document.getElementById('sharedFileList');
+
+listSharedFilesButton.addEventListener('click', async function () {
+    const token = tokenInput.value;
+    const sharedFilesEndpoint = 'https://graph.microsoft.com/v1.0/me/drive/sharedWithMe';
+
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(sharedFilesEndpoint, { headers });
+        const data = await response.json();
+
+        sharedFileList.innerHTML = '';
+
+        data.value.forEach(file => {
+            const fileCard = document.createElement('div');
+            fileCard.classList.add('file-card');
+
+            const fileName = document.createElement('div');
+            fileName.classList.add('file-name');listDrivesButton
+            fileName.textContent = file.name;
+            fileCard.appendChild(fileName);
+
+            const fileDetails = document.createElement('div');
+            fileDetails.classList.add('file-details');
+            fileDetails.innerHTML = `
+                <strong>Size:</strong> ${file.size ? `${file.size} bytes` : 'N/A'}
+                <strong>Type:</strong> ${file.file ? 'File' : 'Folder'}
+                ${file.file ? `<a href="#" class="download-link" data-id="${file.id}">Download</a>` : ''}
+            `;
+            fileCard.appendChild(fileDetails);
+
+            sharedFileList.appendChild(fileCard);
+
+            if (file.file) {
+                const downloadLink = fileDetails.querySelector('.download-link');
+                downloadLink.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    const itemId = downloadLink.getAttribute('data-id');
+                    await downloadFile(itemId, headers);
+                });
+            }
+        });
+    } catch (error) {
+        sharedFileList.innerHTML = `Error fetching shared files: ${error.message}`;
+    }
+});
+
+
+// SHAREPOINT
+const listDrivesButton = document.getElementById('listDrivesButton');
+listDrivesButton.addEventListener('click', listSharePointDrives);
+const listSitesButton = document.getElementById('listSitesButton');
+listSitesButton.addEventListener('click', listSharePointSites);
+
+
+async function listSharePointDrives() {
+    const token = tokenInput.value;
+
+    // Step 1: Get the root SharePoint site
+    const siteApiEndpoint = 'https://graph.microsoft.com/v1.0/sites/root';
+
+    const siteHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const siteResponse = await fetch(siteApiEndpoint, { headers: siteHeaders });
+        const siteData = await siteResponse.json();
+
+        const siteId = siteData.id;
+
+        // Step 2: Get drives associated with the root SharePoint site
+        const drivesApiEndpoint = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives`;
+
+        const drivesHeaders = {
+            'Authorization': `Bearer ${token}`
+        };
+
+        const drivesResponse = await fetch(drivesApiEndpoint, { headers: drivesHeaders });
+        const drivesData = await drivesResponse.json();
+
+        const driveList = document.getElementById('driveList');
+        driveList.innerHTML = '';
+
+        drivesData.value.forEach(drive => {
+            // Create a site card for each SharePoint drive
+            const driveCard = document.createElement('div');
+            driveCard.classList.add('item-card'); // Apply the same card styles
+            driveCard.style.width = '100%'; // Make the card stretch across the window
+
+            const driveName = document.createElement('div');
+            driveName.classList.add('item-name'); // Apply the same title styles
+            driveName.textContent = `Display Name: ${drive.name}`;
+            driveName.style.color = '#333'; // Set text color to black
+            driveCard.appendChild(driveName);
+
+            const driveDetails = document.createElement('div');
+            driveDetails.classList.add('item-description'); // Apply the same description styles
+            driveDetails.innerHTML = `
+                <strong>Type:</strong> ${drive.driveType}
+                <strong>URL:</strong> ${drive.webUrl}
+            `;
+            driveCard.appendChild(driveDetails);
+
+            driveList.appendChild(driveCard);
+
+            // Add hover effect to the drive card
+            driveCard.addEventListener('mouseenter', () => {
+                driveCard.style.transform = 'translateY(-5px)';
+                driveCard.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+            });
+
+            driveCard.addEventListener('mouseleave', () => {
+                driveCard.style.transform = 'translateY(0)';
+                driveCard.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            });
+
+            // Add a click event listener to show drive contents when clicked
+            driveCard.addEventListener('click', async () => {
+                const driveId = drive.id;
+                await listDriveContents(driveId, token);
+            });
+        });
+    } catch (error) {
+        driveList.innerHTML = `Error fetching SharePoint drives: ${error.message}`;
+    }
+}
+
+async function listDriveContents(driveId, token) {
+    const driveContentsApiEndpoint = `https://graph.microsoft.com/v1.0/drives/${driveId}/root/children`;
+
+    const driveContentsHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const driveContentsResponse = await fetch(driveContentsApiEndpoint, { headers: driveContentsHeaders });
+        const driveContentsData = await driveContentsResponse.json();
+
+        const sharePointDriveFileListContainer = document.getElementById('sharePointDriveFileList');
+        sharePointDriveFileListContainer.innerHTML = '';
+
+        driveContentsData.value.forEach(item => {
+            // Create a site content card for each item
+            const itemCard = document.createElement('div');
+            itemCard.classList.add('item-card'); // Apply the same card styles
+            itemCard.style.width = '100%'; // Make the card stretch across the window
+
+            const itemSummary = document.createElement('div');
+            itemSummary.classList.add('item-summary'); // Apply the same summary styles
+
+            const itemName = document.createElement('strong');
+            itemName.textContent = `Name: ${item.name}`;
+            itemName.style.color = '#333'; // Set text color to black
+            itemSummary.appendChild(itemName);
+
+            const itemSize = document.createElement('div');
+            itemSize.textContent = `Size: ${item.size ? `${item.size} bytes` : 'N/A'}`;
+            itemSize.style.color = '#333';
+            itemSummary.appendChild(itemSize);
+
+            const itemType = document.createElement('div');
+            itemType.textContent = `Type: ${item.folder ? 'Folder' : 'File'}`;
+            itemType.style.color = '#333';
+            itemSummary.appendChild(itemType);
+
+            if (item.folder) {
+                const folderLink = document.createElement('a');
+                folderLink.href = '#';
+                folderLink.classList.add('folder-link');
+                folderLink.setAttribute('data-folder-id', item.id);
+                folderLink.textContent = 'Open Folder';
+                folderLink.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    const folderId = folderLink.getAttribute('data-folder-id');
+                    await fetchAndDisplaySharePointDriveContents(driveId, folderId, token, sharePointDriveFileListContainer);
+                });
+                itemSummary.appendChild(folderLink);
+            } else {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = item['@microsoft.graph.downloadUrl'];
+                downloadLink.classList.add('sharepoint-download-link');
+                downloadLink.textContent = 'Download';
+                itemSummary.appendChild(downloadLink);
+            }
+
+            itemCard.appendChild(itemSummary);
+            sharePointDriveFileListContainer.appendChild(itemCard);
+        });
+
+        // Event listener to file links
+        const sharePointDownloadLinks = document.querySelectorAll('.sharepoint-download-link');
+        sharePointDownloadLinks.forEach(link => {
+            link.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const downloadUrl = link.getAttribute('href');
+                await downloadSharePointFile(downloadUrl);
+            });
+        });
+
+        const spfolderLinks = document.querySelectorAll('.folder-link');
+        spfolderLinks.forEach(link => {
+            link.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const folderId = link.getAttribute('data-folder-id');
+                await fetchAndDisplaySharePointDriveContents(driveId, folderId, token, sharePointDriveFileListContainer);
+            });
+        });
+    } catch (error) {
+        sharePointDriveFileListContainer.innerHTML = `Error fetching drive contents: ${error.message}`;
+    }
+}
+
+
+async function listSharePointSites() {
+    const token = tokenInput.value;
+
+    // Step 1: Search for all SharePoint sites
+    const sitesApiEndpoint = 'https://graph.microsoft.com/v1.0/sites?search=*';
+
+    const sitesHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const sitesResponse = await fetch(sitesApiEndpoint, { headers: sitesHeaders });
+        const sitesData = await sitesResponse.json();
+
+        const siteList = document.getElementById('siteList');
+        siteList.innerHTML = '';
+
+        sitesData.value.forEach(site => {
+            // Create a site card for each SharePoint site
+            const siteCard = document.createElement('div');
+            siteCard.classList.add('item-card'); // Apply the same card styles
+            siteCard.style.width = '100%'; // Make the card stretch across the window
+
+            const siteName = document.createElement('div');
+            siteName.classList.add('item-name'); // Apply the same title styles
+            siteName.textContent = `Display Name: ${site.displayName}`;
+            siteName.style.color = '#333'; // Set text color to black
+            siteCard.appendChild(siteName);
+
+            const siteDetails = document.createElement('div');
+            siteDetails.classList.add('item-description'); // Apply the same description styles
+            siteDetails.innerHTML = `
+                <strong>Name:</strong> ${site.name}
+                <strong>URL:</strong> ${site.webUrl}
+            `;
+            siteCard.appendChild(siteDetails);
+
+            siteList.appendChild(siteCard);
+
+            // Add hover effect to the site card
+            siteCard.addEventListener('mouseenter', () => {
+                siteCard.style.transform = 'translateY(-5px)';
+                siteCard.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+            });
+
+            siteCard.addEventListener('mouseleave', () => {
+                siteCard.style.transform = 'translateY(0)';
+                siteCard.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            });
+
+            // Add a click event listener to show site contents when clicked
+            siteCard.addEventListener('click', async () => {
+                const siteId = site.id;
+                await listSiteContents(siteId, token);
+            });
+        });
+    } catch (error) {
+        siteList.innerHTML = `Error fetching SharePoint sites: ${error.message}`;
+    }
+}
+
+async function listSiteContents(driveId, token) {
+    const driveContentsApiEndpoint = `https://graph.microsoft.com/v1.0/sites/${driveId}/drive/root/children`;
+
+    const driveContentsHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const driveContentsResponse = await fetch(driveContentsApiEndpoint, { headers: driveContentsHeaders });
+        const driveContentsData = await driveContentsResponse.json();
+
+        const sharePointfileListContainer = document.getElementById('sharePointfileList');
+        sharePointfileListContainer.innerHTML = '';
+
+        driveContentsData.value.forEach(item => {
+            // Create a site content card
+            const itemCard = document.createElement('div');
+            itemCard.classList.add('item-card'); // Apply the same card styles
+            itemCard.style.width = '100%'; // Make the card stretch across the window
+
+            const itemName = document.createElement('div');
+            itemName.classList.add('item-name'); // Apply the same title styles
+            itemName.textContent = item.name;
+            itemName.style.color = '#333'; // Set text color to black
+            itemCard.appendChild(itemName);
+
+            const itemDetails = document.createElement('div');
+            itemDetails.classList.add('item-description'); // Apply the same description styles
+            itemDetails.innerHTML = `
+                <strong>Size:</strong> ${item.size ? `${item.size} bytes` : 'N/A'}
+                <strong>Type:</strong> ${item.folder ? 'Folder' : 'File'}
+                <strong>URL:</strong> ${item.webUrl}
+                ${item.folder ? `<a href="#" class="folder-link" data-folder-id="${item.id}">Open Folder</a>` : `<a href="${item['@microsoft.graph.downloadUrl']}" class="download-link">Download</a>`}
+            `;
+            itemCard.appendChild(itemDetails);
+
+            sharePointfileListContainer.appendChild(itemCard);
+
+            // Add hover effect to the item card
+            itemCard.addEventListener('mouseenter', () => {
+                itemCard.style.transform = 'translateY(-5px)';
+                itemCard.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+            });
+
+            itemCard.addEventListener('mouseleave', () => {
+                itemCard.style.transform = 'translateY(0)';
+                itemCard.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            });
+
+            // Event listener to folder links
+            const folderLink = itemCard.querySelector('.folder-link');
+            folderLink.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const folderId = folderLink.getAttribute('data-folder-id');
+                await fetchAndDisplaySharePointFolderContents(driveId, folderId, token, sharePointfileListContainer);
+            });
+        });
+    } catch (error) {
+        sharePointfileListContainer.innerHTML = `Error fetching drive contents: ${error.message}`;
+    }
+}
+
+// Function to fetch and display folder contents within SharePoint drive
+
+async function fetchAndDisplaySharePointDriveContents(driveId, folderId, token, container) {
+    const folderContentsUrl = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children`;
+
+    const folderContentsHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(folderContentsUrl, { headers: folderContentsHeaders });
+        const data = await response.json();
+
+        const sharePointDriveFileListContainer = document.getElementById('sharePointDriveFileList');
+        data.value.forEach(item => {
+            // Create a site content card
+            const itemCard = document.createElement('div');
+            itemCard.classList.add('item-card'); // Apply the same card styles
+            itemCard.style.width = '100%'; // Make the card stretch across the window
+
+            const itemSummary = document.createElement('div');
+            itemSummary.classList.add('item-summary'); // Apply the same summary styles
+
+            const itemName = document.createElement('strong');
+            itemName.textContent = `Name: ${item.name}`;
+            itemName.style.color = '#333'; // Set text color to black
+            itemSummary.appendChild(itemName);
+
+            const itemSize = document.createElement('span');
+            itemSize.textContent = ` | Size: ${item.size ? `${item.size} bytes` : 'N/A'}`;
+            itemSize.style.color = '#333';
+            itemSummary.appendChild(itemSize);
+
+            const itemType = document.createElement('span');
+            itemType.textContent = ` | Type: ${item.folder ? 'Folder | ' : 'File | '}`;
+            itemType.style.color = '#333';
+            itemSummary.appendChild(itemType);
+
+            if (item.folder) {
+                const folderLink = document.createElement('a');
+                folderLink.href = '#';
+                folderLink.classList.add('folder-link');
+                folderLink.setAttribute('data-folder-id', item.id);
+                folderLink.textContent = 'Open Folder';
+                folderLink.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    const folderId = folderLink.getAttribute('data-folder-id');
+                    await fetchAndDisplaySharePointFolderContents(driveId, folderId, token, sharePointDriveFileListContainer);
+                });
+                itemSummary.appendChild(folderLink);
+            } else {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = item['@microsoft.graph.downloadUrl'];
+                downloadLink.classList.add('sharepoint-download-link');
+                downloadLink.textContent = 'Download';
+                itemSummary.appendChild(downloadLink);
+            }
+
+            itemCard.appendChild(itemSummary);
+            sharePointDriveFileListContainer.appendChild(itemCard);
+        });
+    } catch (error) {
+        container.innerHTML = `Error fetching folder contents: ${error.message}`;
+    }
+}
+
+async function fetchAndDisplaySharePointFolderContents(driveId, folderId, token, container) {
+    const folderContentsUrl = `https://graph.microsoft.com/v1.0/sites/${driveId}/drive/items/${folderId}/children`;
+
+    const folderContentsHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response = await fetch(folderContentsUrl, { headers: folderContentsHeaders });
+        const data = await response.json();
+
+        const sharePointfileListContainer = document.getElementById('sharePointfileList');
+        data.value.forEach(item => {
+            // Create a site content card
+            const itemCard = document.createElement('div');
+            itemCard.classList.add('item-card'); // Apply the same card styles
+            itemCard.style.width = '100%'; // Make the card stretch across the window
+
+            const itemSummary = document.createElement('div');
+            itemSummary.classList.add('item-summary'); // Apply the same summary styles
+
+            const itemName = document.createElement('strong');
+            itemName.textContent = `Name: ${item.name}`;
+            itemName.style.color = '#333'; 
+            itemSummary.appendChild(itemName);
+    
+            const itemSize = document.createElement('span');
+            itemSize.textContent = ` | Size: ${item.size ? `${item.size} bytes` : 'N/A'}`;
+            itemSize.style.color = '#333';
+            itemSummary.appendChild(itemSize);
+
+            const itemType = document.createElement('span');
+            itemType.textContent = ` | Type: ${item.folder ? 'Folder | ' : 'File | '}`;
+            itemType.style.color = '#333';
+            itemSummary.appendChild(itemType);
+
+            if (item.folder) {
+                const folderLink = document.createElement('a');
+                folderLink.href = '#';
+                folderLink.classList.add('folder-link');
+                folderLink.setAttribute('data-folder-id', item.id);
+                folderLink.textContent = 'Open Folder';
+                folderLink.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    const folderId = folderLink.getAttribute('data-folder-id');
+                    await fetchAndDisplaySharePointFolderContents(driveId, folderId, token, sharePointfileListContainer);
+                });
+                itemSummary.appendChild(folderLink);
+            } else {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = item['@microsoft.graph.downloadUrl'];
+                downloadLink.classList.add('sharepoint-download-link');
+                downloadLink.textContent = 'Download';
+                itemSummary.appendChild(downloadLink);
+            }
+
+            itemCard.appendChild(itemSummary);
+            sharePointfileListContainer.appendChild(itemCard);
+        });
+    } catch (error) {
+        container.innerHTML = `Error fetching folder contents: ${error.message}`;
+    }
+}
+
+async function downloadSharePointFile(downloadUrl) {
+    try {
+        const response = await fetch(downloadUrl);
+        const blob = await response.blob();
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'downloadedFile';
+        a.click();
+    } catch (error) {
+        sharePointfileList.innerHTML = `Error downloading file: ${error.message}`;
+    }
+}
+
+function openSharePointFolder(driveId, folderId, token) {
+    fetchAndDisplaySharePointFolderContents(driveId, folderId, token);
+}
+
+
+// Function to read a file and convert it to base64
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result.split(',')[1]); // Extract base64 content from data URL
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+
+
+// Add an event listener to the parseTokenButton
+const parseTokenButton = document.getElementById('parseTokenButton');
+parseTokenButton.addEventListener('click', parseAndDisplayToken);
+
+clearTokenButton.addEventListener('click', function() {
+    document.getElementById('token').value = '';
+});
+
+
+// Function to parse the JWT and display the extracted fields
+function parseAndDisplayToken() {
+    const tokenInput = document.getElementById('token');
+    const jwt = tokenInput.value;
+
+    try {
+        // Parse the JWT payload (second part of the JWT)
+        const payloadBase64 = jwt.split('.')[1];
+        const decodedPayload = atob(payloadBase64);
+        const payload = JSON.parse(decodedPayload);
+
+        // Calculate minutes to expire
+        const expirationDate = new Date(payload.exp * 1000);
+        const currentDate = new Date();
+        const differenceInMilliseconds = expirationDate - currentDate;
+        const minutesToExpire = Math.floor(differenceInMilliseconds / 60000);
+
+        // Extract the desired fields and add Minutes to Expire
+        const extractedFields = {
+            Audience: payload.aud,
+            Issuer: payload.iss,
+            ExpirationTime: expirationDate.toLocaleString(),
+            MinutesToExpire: minutesToExpire >= 0 ? minutesToExpire : 'Expired',
+            AppDisplayName: payload.app_displayname,
+            AppID: payload.appid,
+            Name: payload.name,
+            UserPrincipalName: payload.upn,
+            Scope: payload.scp,
+            TenantID: payload.tid,
+
+        };
+
+        
+        // Display the extracted fields
+        const jwtFieldsContainer = document.getElementById('jwtFields');
+        jwtFieldsContainer.innerHTML = '';
+        for (const field in extractedFields) {
+            const fieldDetail = `
+                ${field}: ${extractedFields[field]}
+            `;
+            jwtFieldsContainer.innerHTML += fieldDetail;
+        }
+        
+        // Change text color to red if expired
+        if (extractedFields.MinutesToExpire === 'Expired') {
+            jwtFieldsContainer.style.backgroundColor = '#771c1c';
+        } else {
+            jwtFieldsContainer.style.backgroundColor = '#303030'; // Default text color
+        }       
+
+    } catch (error) {
+        const jwtFieldsContainer = document.getElementById('jwtFields');
+        jwtFieldsContainer.innerHTML = `Error parsing and displaying JWT: ${error.message}`;
+    }
+}
+
+
+// SCRIPT ++
+
+// Show Hide AccessToken / Refreshtoken
+    function toggleVisibility(selectedValue) {
+        var accessTokens = document.getElementById('accessTokens');
+        var refreshTokens = document.getElementById('refreshTokens');
+         if (selectedValue === 'accessTokens') {
+                accessTokens.style.display = 'block';
+                refreshTokens.style.display = 'none';
+        } else {
+                accessTokens.style.display = 'none';
+                refreshTokens.style.display = 'block';
+                document.getElementById('responseArea').value = '';
+        }
+    }
+
+
+
+// HAR file read input file
+// AccessToken  / RefreshToken parse  
+    let headersByURL = {};
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        headersByURL = {};
+        clearSelectionBoxes();
+        const files = event.target.files;
+        if (!files) {
+            return;
+        }
+        Array.from(files).forEach(file => {      
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const har = JSON.parse(content);
+                processHarFile(har);
+                filteredEntries = har.log.entries.filter(entry => 
+                        entry.request.postData && entry.request.postData.text.includes('grant_type=refresh_token'));
+                populateListbox(filteredEntries);
+
+            };
+            reader.readAsText(file);
+        });
+    });
+
+    function processHarFile(har) {
+        const entries = har.log.entries;
+
+        entries.forEach(entry => {
+            entry.request.headers.forEach(header => {
+                if (header.name.toLowerCase() === 'authorization' 
+                && header.value.toLowerCase().includes('bearer') 
+                && header.value.length > 10) {
+                    const url = entry.request.url;
+                    if (!headersByURL[url]) {
+                        headersByURL[url] = new Set();
+                    }
+                    headersByURL[url].add(header.value);
+                }
+            });
+        });
+        updateUrlsSelectBox();
+    }
+
+    function updateUrlsSelectBox() {
+        const urlsSelectBox = document.getElementById('urls');
+        urlsSelectBox.innerHTML = '';
+
+        for (const url in headersByURL) {
+            const option = document.createElement('option');
+            option.textContent = url;
+            option.value = url;
+            urlsSelectBox.appendChild(option);
+        }
+    }
+
+    function clearSelectionBoxes() {
+        const urlsSelectBox = document.getElementById('urls');
+        const headersSelectBox = document.getElementById('headers');
+        if (urlsSelectBox) urlsSelectBox.innerHTML = '';
+        if (headersSelectBox) headersSelectBox.innerHTML = '';
+    }
+
+    function updateHeaders(selectedUrl) {
+        const headersSelectBox = document.getElementById('headers');
+        headersSelectBox.innerHTML = '';
+
+        if (headersByURL[selectedUrl]) {
+            headersByURL[selectedUrl].forEach(headerValue => {
+                const bearerToken = headerValue.replace('Bearer ', '').trim();
+                const option = document.createElement('option');
+                option.textContent = bearerToken;
+                headersSelectBox.appendChild(option);
+            });
+            if (headersSelectBox.options.length > 0) {
+                headersSelectBox.selectedIndex = 0; // Select the first item
+                copyToInput(); // Copy the value of the first item to the input
+                parseAndDisplayToken();
+            }	
+        }
+    }
+
+    function copyToInput() {
+        const headersSelectBox = document.getElementById('headers');
+        const tokenInput = document.getElementById('token');
+        if (headersSelectBox.selectedIndex >= 0) {
+            tokenInput.value = headersSelectBox.options[headersSelectBox.selectedIndex].text;
+        }
+        parseAndDisplayToken();
+    }
+
+
+    function testMergedData(){
+        if (typeof mergedData === 'undefined' || mergedData === null || (Array.isArray(mergedData) && mergedData.length === 0)) {
+            document.getElementById('listUsersResponse').textContent = 'There is no data available. First click Export Users Data, after finished, press this button.';
+        } else {
+            fetchUserDataMFA();
+        }
+    }
+
+    async function fetchUserDataMFA() {
+        document.getElementById('listUsersResponse').textContent = '';
+        window.mfaNotEnabledUsers = ''
+        let tableString = 'Created DateTime    | LastPassword Change | TimeDiff (sec) | MFA Enabled | User Principal Name\n';
+        tableString += '-'.repeat(100) + '\n'; // Separator line
+
+        let formattedData = []; // Declare formattedData
+
+        for (const userData of mergedData) {
+            try {
+                const timeDifference = Math.floor((new Date(userData.lastPasswordChangeDateTime).getTime() - new Date(userData.createdDateTime).getTime()) / 1000);
+                const formattedUser = {
+                    id: userData.id,
+                    userPrincipalName: userData.userPrincipalName,
+                    lastPasswordChangeDateTime: userData.lastPasswordChangeDateTime,
+                    createdDateTime: userData.createdDateTime,
+                    timeDifference: timeDifference,
+                    accountEnabled: userData.accountEnabled,
+                    mfaEnabled: (Math.floor((new Date(userData.lastPasswordChangeDateTime).getTime() - new Date(userData.createdDateTime).getTime()) / 1000) <= 0) ? 'false' : '?'
+                };
+
+                formattedData.push(formattedUser);
+                if (userData.accountEnabled) {    
+                    // Format each user's data with fixed-width columns
+                   tableString += `${formattedUser.createdDateTime.replace('T', ' ').replace('Z', '')} | ${formattedUser.lastPasswordChangeDateTime.replace('T', ' ').replace('Z', '')} | ${formattedUser.timeDifference.toString().padEnd(14)} | ${formattedUser.mfaEnabled.toString().padEnd(11)} | ${formattedUser.userPrincipalName}\n`;
+                   if (formattedUser.mfaEnabled === 'false'){
+                        window.mfaNotEnabledUsers += formattedUser.userPrincipalName + "\n"
+                   }
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Set the table string as the textContent of the pre element
+        document.getElementById('listUsersResponse').textContent = tableString;
+    }
+
+
+
+
+
+
+
+
+
+    function getUsersDataFull() {
+    function downloadJSON(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    const secret = document.getElementById("token").value;
+    
+
+    async function fetchData(id) {
+        const response = await fetch("https://graph.microsoft.com/beta/users/" + id + "?$select=id,accountEnabled,userPrincipalName,lastPasswordChangeDateTime,createdDateTime", {
+            headers: {
+                accept: "application/json, text/plain, */*",
+                authorization: "Bearer " + secret
+            },
+            method: "GET"
+        });
+        return response.json();
+    }
+
+    let formattedData = [];
+
+    async function fetchUserData() {
+       // let tableString = 'Created DateTime     | Last Password Change | Time Diff (sec) | MFA Enabled | User Principal Name\n';
+       tableString = "User Data Loading ... see Developer Tools Webbrowser (F12) and click Network to check progress\n"
+       tableString += '-'.repeat(94) + '\n'; // Separator line
+       lengthUsers = myData.length + 1   
+        for (const data of myData) {
+            try {
+                const userData = await fetchData(data.id);
+                const formattedUserDisplay = {
+                    id: userData.id,
+                    userPrincipalName: userData.userPrincipalName,
+                    countLengthUsers: lengthUsers = lengthUsers-1
+                };
+
+                const timeDifference = Math.floor((new Date(userData.lastPasswordChangeDateTime).getTime() - new Date(userData.createdDateTime).getTime()) / 1000);
+
+                const formattedUser = {
+                    id: userData.id,
+                    userPrincipalName: userData.userPrincipalName,
+                    lastPasswordChangeDateTime: userData.lastPasswordChangeDateTime,
+                    createdDateTime: userData.createdDateTime,
+                    timeDifference: timeDifference,
+                    accountEnabled: userData.accountEnabled,
+                    mfaEnabled: (Math.floor((new Date(userData.lastPasswordChangeDateTime).getTime() - new Date(userData.createdDateTime).getTime()) / 1000) <= 0) ? 'false' : '?'
+                };
+                
+                formattedData.push(formattedUser);
+               // if (userData.accountEnabled){    
+                    // Format each user's data with fixed-width columns
+                    tableString += `${formattedUserDisplay.countLengthUsers.toString().padEnd(2)} - ${formattedUserDisplay.userPrincipalName.toString().padEnd(97)}\n`;
+
+                    //}    
+
+                } catch (error) {
+                    console.error(error);
+                }
+                    // Set the table string as the textContent of the pre element
+                document.getElementById('listUsersResponse').textContent = tableString;
+        }
+    }
+
+    async function fetchAllDataAndUserData() {
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url, {
+                    "headers": {
+                        "accept": "application/json, text/plain, */*",
+                        "authorization": "Bearer " + secret
+                    },
+                    "method": "GET"
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function fetchAllData() {
+            try {
+                let url = "https://graph.microsoft.com/beta/users";
+                while (url) {
+                    const data = await fetchData(url);
+                    if (data && data.value) {
+                        myData = myData.concat(data.value);                    
+
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    url = data['@odata.nextLink'];
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+        }
+
+        await fetchAllData();
+        await fetchUserData();
+    }
+
+    (async () => {
+            await fetchAllDataAndUserData();
+            mergedData = myData.map(data => {
+                const formattedUser = formattedData.find(user => user.id === data.id);
+                return { ...data, ...formattedUser };
+            });
+            const mergedJSON = JSON.stringify(mergedData);
+            downloadJSON(mergedJSON, "users_full.json");
+        })();
+    }
+
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        document.getElementById('tokensSessions').style.display = 'block';
+        document.getElementById('tokensSessions').value = 'accessTokens';
+        toggleVisibility('accessTokens');
+    });
+
+
+
+
+
+
+    function populateListbox(entries) {
+        const listbox = document.getElementById('urlList');
+        listbox.innerHTML = '';
+        entries.forEach((entry, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = entry.request.url;
+            listbox.appendChild(option);
+        });
+    }
+
+        function displayRequestDetails() {
+            const listbox = document.getElementById('urlList');
+            const textarea = document.getElementById('requestDetails');
+            const selectedIndex = listbox.selectedIndex;
+            const selectedEntry = filteredEntries[selectedIndex];
+
+            if (selectedEntry) {
+                const requestLine = `${selectedEntry.request.method} ${selectedEntry.request.url} HTTP/1.1\n`;
+                const headers = selectedEntry.request.headers.map(header => `${header.name}: ${header.value}`).join('\n');
+                const body = selectedEntry.request.postData ? `\n\n${selectedEntry.request.postData.text}` : '';
+                textarea.value = requestLine + headers + body;
+            }
+        }
+
+        async function replayRequest() {
+            const requestDetails = document.getElementById('requestDetails').value;
+            const responseArea = document.getElementById('responseArea');
+            try {
+                const { url, options } = parseRequestDetails(requestDetails);
+                const response = await fetch(url, options);
+                const text = await response.text();
+                responseArea.value = text;
+
+                // Check if response is JSON and extract access_token
+                try {
+                    const jsonResponse = JSON.parse(text);
+                    if (jsonResponse.access_token) {
+                        document.getElementById('token').value = jsonResponse.access_token;
+                        document.getElementById('parseTokenButton').click(); // Programmatically click the button
+                    }
+                } catch (jsonError) {
+                    // Handle the case where the response is not JSON or doesn't contain access_token
+                    console.error('JSON parsing error or access_token not found:', jsonError);
+                }
+
+            } catch (error) {
+                responseArea.value = 'Error: ' + error.message;
+            }
+        }
+
+
+        function parseRequestDetails(details) {
+            const lines = details.split('\n');
+            const requestLine = lines[0].split(' ');
+            const method = requestLine[0];
+            const url = requestLine[1];
+            const headers = {};
+            let body = null;
+            let isBody = false;
+
+            lines.slice(1).forEach(line => {
+                if (line === '') {
+                    isBody = true;
+                    return;
+                }
+                if (!isBody) {
+                    const [key, value] = line.split(': ');
+                    headers[key] = value;
+                } else {
+                    body = (body || '') + line;
+                }
+            });
+
+            return {
+                url: url,
+                options: {
+                    method: method,
+                    headers: headers,
+                    body: method !== 'GET' ? body : undefined
+                }
+            };
+        }
+
+
+
+        window.onload = function() {
+                document.getElementById('accessTokens').style.display = 'none';
+                document.getElementById('refreshTokens').style.display = 'none';
+                document.getElementById('tokensSessions').style.display = 'none';
+                
+        };
+
+</script>
+</body>
+</html>
