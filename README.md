@@ -105,14 +105,15 @@ I uploaded edited version of GraphRunner from @dafthack and credits to him. In t
 
 Please understand that the code might seem a bit disorganized. My expertise is not primarily in JavaScript, so my main focus was on adding new features rather than organizing the code.
 
-1. Download HAR file(s) you can use the Development Tools available in web browsers. For most browsers, simply press F12 to open the Development Tools, then navigate to the 'Network' tab to save the HAR files, after refreshing webpage: 
-https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/85204f91-0498-4b86-969f-0e6f6d871a87
+1. Download HAR file(s) you can use the Development Tools available in web browsers. For most browsers, simply press F12 to open the Development Tools, then navigate to the 'Network' tab to save the HAR files, after refreshing webpage:
+https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/84dddabd-3feb-4fa5-a00d-eaa2277b8789
 
-2. Upload your HAR file(s) via the provided interface. Once uploaded, you can navigate through various Access Tokens to analyze session details, including their scopes and more. Tokens displayed in red indicate that they have expired. GraphRunner also supports the use of Refresh Tokens to generate new, valid Access Tokens when necessary:
-https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/a53e2aa1-ea36-4378-bd6a-ac629473ed69
+3. Upload your HAR file(s) via the provided interface. Once uploaded, you can navigate through various Access Tokens to analyze session details, including their scopes and more. Tokens displayed in red indicate that they have expired. GraphRunner also supports the use of Refresh Tokens to generate new, valid Access Tokens when necessary:
+https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/c7b045a1-ab21-4cae-b06f-d10bb3cf8af2
 
-3. Added features to allow the downloading of complete user data in a JSON file, detect MFA anomalies in accounts, and download a list of these anomalies:
-https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/14d0090c-06b7-435a-904f-61e24f9798c0
+4. Added features to allow the downloading of complete user data in a JSON file, detect MFA anomalies in accounts, and download a list of these anomalies:
+https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/e14741c0-0cc5-44b5-b231-fea0b9b0d17b
+
 
 
 
