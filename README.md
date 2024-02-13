@@ -99,5 +99,20 @@ Update 16-10-2023:
 
 How to use the ```--code-javascript``` argument to generate a list of users on the Azure Portal, which can then be imported using the command ```azurepwchecker.py --json-input merged_users.json```:
 
+Update 13-02-2024:
+
+I uploaded edited version of GraphRunner from @dafthack and credits to him. In this modified version, I have added a new feature that lets you read HAR files directly from the "victim's" device. This new function helps in checking and examining Access Tokens to access different permissions or scopes. Additionally, if an Access Token has expired, this version allows the use of a Refresh Token to create a new Access Token. This process is time-sensitive, but it removes the need for usernames and passwords, if you already have logged in to Office365 enviroment, as it only requires the session tokens found in HAR files.
+
+Please understand that the code might seem a bit disorganized. My expertise is not primarily in JavaScript, so my main focus was on adding new features rather than organizing the code.
+
+1. Download HAR file(s) you can use the Development Tools available in web browsers. For most browsers, simply press F12 to open the Development Tools, then navigate to the 'Network' tab to save the HAR files, after refreshing webpage: 
+https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/85204f91-0498-4b86-969f-0e6f6d871a87
+
+2. Upload your HAR file(s) via the provided interface. Once uploaded, you can navigate through various Access Tokens to analyze session details, including their scopes and more. Tokens displayed in red indicate that they have expired. GraphRunner also supports the use of Refresh Tokens to generate new, valid Access Tokens when necessary:
+https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/a53e2aa1-ea36-4378-bd6a-ac629473ed69
+
+3. Added features to allow the downloading of complete user data in a JSON file, detect MFA anomalies in accounts, and download a list of these anomalies:
+https://github.com/quahac/Azure-AD-Password-Checker/assets/49560894/14d0090c-06b7-435a-904f-61e24f9798c0
+
 
 
