@@ -7,6 +7,8 @@ import json
 from collections import Counter
 from datetime import datetime
 
+script_version = '1.0.1'
+
 parser = argparse.ArgumentParser(description='''Azure AD Password Checker - This is a parser for generated JSON file or the roadrecon database file designed for use by both red and blue teams. 
 Database can be created when using --code-javascript option to extract 'merged_users.json' file with be created to later input this file with --json-input argument.
 And roadrecon generated roadrecon.db file can be used! roadrecon is developed by https://github.com/dirkjanm credits to him!''')
@@ -20,6 +22,8 @@ parser.add_argument('-d','--db', type=str, default='roadrecon.db',
                     help="Specify the path to the 'roadrecon.db' database file, default is this location")
 parser.add_argument('-m','--mfa-list',action='store_true', default=False,
                     help="User Accounts without MFA (No privileged user required)! This argument helps identify user accounts that have not enabled Multi-Factor Authentication (MFA). If an account's creation date and time match its last password change date and time, it may indicate that no human interaction has occurred since the account was created, and the user has not been able to enable MFA or change their password. And there are other 'anomalies' such as the password change date being older than the creation date. This suggests also that Multi-Factor Authentication (MFA) couldn't be enabled because the User wasn't created yet! :-]")   
+parser.add_argument('-mo','--outfile', type=str,  default=False,
+                    help='Output users with MFA anomalies to file')
 parser.add_argument('-l','--pw-month', action='store_true', default=False,
                     help='User accounts that had their passwords changed last month')
 parser.add_argument('-ll','--pw-year', action='store_true', default=False,
@@ -31,20 +35,23 @@ parser.add_argument('-la','--admin', action='store_true', default=False,
 parser.add_argument('-lo','--out-of-hours', action='store_true', default=False,
                     help="User password change that occurred outside of office hours, specifically between 5:00 PM (17:00) and 8:00 AM (08:00) on weekdays, as well as on Saturdays and Sundays")
 parser.add_argument('-ji','--json-input', type=str,  default=False,
-                    help="Provide the JSON file imported from your web browser's console using JavaScript. For 'createdDateTime' and 'lastPasswordChange' details, ensure you download the JSON output using the '--code-javascript' option.") 
+                    help="Provide the JSON file imported from your web browser's console using JavaScript. For 'createdDateTime' and 'lastPasswordChange' details, ensure you download the JSON output using the '--code-javascript' option. users_temp.db file will be added to the current folder") 
 parser.add_argument('-c', '--code-javascript', action='store_true', default=False,
                     help="""Perform extraction even if 'azurepwchecker.py' or 'roadrecon' is unavailable. This script enables extraction through the JavaScript console of a web browser. To proceed, ensure you have a valid account to log in at https://portal.azure.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers or an active session on a computer. Copy and paste the provided JavaScript code into the browser's console. Once the session is validated and you have the necessary permissions, a JSON file named 'merged_users.json' will be generated. You can then import it using the following command as example:
                         'azurepwchecker.py --json-input merged_users.json -m'""")
+parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {script_version}')
 
 class line:
     end = '\033[0m'
     underline = '\033[4m'
 
 red     = "\033[0;91m"
-green   = "\033[0;32m"
+green   = "\033[1;32m"
 yellow  = "\033[0;33m"
+cyan_l  = "\033[1;36m"  
 cyan    = "\033[0;36m"
 white   = "\033[0;37m"
+   
 
 args = parser.parse_args()
 
@@ -154,25 +161,46 @@ with sqlite3.connect(db_path) as conn:
     cur = conn.cursor()
     cur_all = conn.cursor()
 
-  
-
 def print_mfa_anomalies():
-    cur.execute("""
-    SELECT 
-        userPrincipalName, 
-        strftime('%Y-%m-%d %H:%M:%S', lastPasswordChangeDateTime), 
-        strftime('%Y-%m-%d %H:%M:%S', createdDateTime), 
-        strftime('%s', lastPasswordChangeDateTime) - strftime('%s', createdDateTime) as timeDifference, 
-        objectId 
-    FROM 
-        users 
-    WHERE 
-        accountEnabled = 1 
-    ORDER BY 
-        timeDifference ASC
-    """)
-    rows = cur.fetchall()
-    
+    try:
+        cur.execute("""
+            SELECT 
+                userPrincipalName, 
+                strftime('%Y-%m-%d %H:%M:%S', lastPasswordChangeDateTime), 
+                strftime('%Y-%m-%d %H:%M:%S', createdDateTime), 
+                strftime('%s', lastPasswordChangeDateTime) - strftime('%s', createdDateTime) as timeDifference, 
+                objectId,
+                mobilePhone, 
+                businessPhones
+            FROM 
+                users 
+            WHERE 
+                accountEnabled = 1 
+            ORDER BY 
+                timeDifference ASC
+        """)
+        rows = cur.fetchall()
+    except Exception as e:
+        cur.execute("""
+            SELECT 
+                userPrincipalName, 
+                strftime('%Y-%m-%d %H:%M:%S', lastPasswordChangeDateTime), 
+                strftime('%Y-%m-%d %H:%M:%S', createdDateTime), 
+                strftime('%s', lastPasswordChangeDateTime) - strftime('%s', createdDateTime) as timeDifference, 
+                objectId,
+                mobile, 
+                telephoneNumber,
+                shadowMobile,
+                shadowOtherMobile    
+            FROM 
+                users 
+            WHERE 
+                accountEnabled = 1 
+            ORDER BY 
+                timeDifference ASC
+        """)
+        rows = cur.fetchall()
+   
     cur_all.execute("""
     SELECT 
         userPrincipalName, 
@@ -191,20 +219,28 @@ def print_mfa_anomalies():
     print("# "+yellow+"Yellow color is difference time in seconds Created vs Last Password Change datetime"+white)
     print("#"+cyan+" The blue color is another MFA anomaly: What is the likelihood of two users changing their"+white)
     print("#"+cyan+" passwords at the exact same time. This function verifies if the lastPasswordChangeDateTime"+white)
-    print("#"+cyan+" matches with another user's, and how many times (x times)\n"+white)
+    print("#"+cyan+" matches with another user's, and how many times (x times)"+white)
+    print("#" + cyan_l + " Light blue indicates that the user has a phone number. If not, it's more likely that" + white)
+    print("#" + cyan_l + " the admin has not added Phone/SMS to the conditional access settings,"+ white)
+    print("#" + cyan_l + " increasing the risk of MFA anomalies. format: (phone numbers: x)\n" + white)
     print(line.underline +"Password Changed"+ line.end+" "*6+ line.underline +"User Created"+line.end+" "*10+line.underline+"UserPrincipalName"+ line.end)
-    
+ 
     password_change_dates = []
     for row in rows_all:
             password_change_dates.append(row[1].translate(str.maketrans('', '', ' TZ:-')))   
 
     date_counts = Counter(password_change_dates)
-        
+    usersToFile = []    
     for i, row in enumerate(rows):
         mail = row[0] if row[0] is not None else ""
         pw_last_change = row[1] if row[1] is not None else ""
         created = row[2] if row[2] is not None else ""
         timediff = row[3] if row[3] is not None else ""
+        phone_numbers = [str(num) for num in row[5:] if num not in [None, 'None', [], '[]']]               
+        if phone_numbers:
+            phones = f"(phone: {', '.join(phone_numbers)})"
+        else:
+            phones = ""
         pw_last_change_RAW = pw_last_change.translate(str.maketrans('', '', ' TZ:-'))
         doublePW = ''
         doublePWint = 0
@@ -213,9 +249,14 @@ def print_mfa_anomalies():
                 doublePW = f"({count}x)"   
                 doublePWint = count
         if timediff < 600 or doublePWint > 1:
-            print(f"{pw_last_change}   {created}   {mail} {yellow}({timediff} sec) {cyan}{doublePW}{white}")
-
+            print(f"{pw_last_change}   {created}   {mail} {yellow}({timediff} sec){cyan}{doublePW}{white}{cyan_l}{phones}{white}")
+            usersToFile.append(mail)
     print("")
+    if args.outfile:
+        with open(args.outfile, 'w') as file:  
+            for email in usersToFile:
+                file.write(email + "\n")
+        print(f'{white}#{green} MFA anomaly email list saved: {args.outfile}{white}\n')        
     conn.close()
  
 def print_password_change_info(days):
@@ -328,6 +369,9 @@ if len(sys.argv) == 3 and args.json_input:
     print_mfa_anomalies()
 
 if args.mfa_list:
+    print_mfa_anomalies()
+    
+if args.outfile:
     print_mfa_anomalies()
 
 if args.pw_month:
