@@ -35,6 +35,8 @@ options:
                         enable MFA or change their password. And there are other 'anomalies' such as the password
                         change date being older than the creation date. This suggests also that Multi-Factor
                         Authentication (MFA) couldn't be enabled because the User wasn't created yet! :-]
+  -mo OUTFILE, --outfile OUTFILE
+                        Output users with MFA anomalies to file
   -l, --pw-month        User accounts that had their passwords changed last month
   -ll, --pw-year        User accounts that had their passwords changed last year
   -lll, --pw-older      User accounts that haven't changed their passwords in a long time, oldest first
@@ -54,7 +56,8 @@ options:
                         have the necessary permissions, a JSON file named 'merged_users.json' will be generated. You
                         can then import it using the following command as example: 'azurepwchecker.py --json-input
                         merged_users.json -m'
-
+  -v, --version         show program's version number and exit
+  
 run roadrecon first:
   (Run the following command to install the tool "pip install roadrecon)"
 
