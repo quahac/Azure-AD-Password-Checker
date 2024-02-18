@@ -9,6 +9,8 @@ What is the likelihood of two users changing their passwords at the exact same t
 
 Update on 18-02-2024: 
 It is possible to enable Multi-Factor Authentication (MFA) without requiring a password update, with phone call or SMS. However, if a user's account does not have a phone number listed, administrators will be unable to activate phone or text message verification options. This omission means users are unable to verify their phone number upon account creation or during login. The lack of phone number verification can make it easier to identify accounts where MFA is not configured. To address this, accounts without a phone number will be marked in light blue and annotated as (phone numbers: x).
+<br>See: [Microsoft/Azure](https://learn.microsoft.com/en-us/azure/active-directory-b2c/multi-factor-authentication?pivots=b2c-user-flow#verification-methods)
+_SMS or phone call - During the first sign-up or sign-in, the user is asked to provide and verify a phone number. During subsequent sign-ins, the user is prompted to select either the Send Code or Call Me option._
 
 This information can be useful for identifying potential security risks designed for use by both red and blue teams.
 
