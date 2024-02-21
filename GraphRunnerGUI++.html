@@ -2477,7 +2477,13 @@ function parseAndDisplayToken() {
 
             if (selectedEntry) {
                 const requestLine = `${selectedEntry.request.method} ${selectedEntry.request.url} HTTP/1.1\n`;
-                const headers = selectedEntry.request.headers.map(header => `${header.name}: ${header.value}`).join('\n');
+                // const headers = selectedEntry.request.headers.map(header => `${header.name}: ${header.value}`).join('\n');
+                const headers = selectedEntry.request.headers
+                .filter(header => !header.name.startsWith(':'))
+                .map(header => `${header.name}: ${header.value}`)
+                .join('\n');
+
+		    
                 const body = selectedEntry.request.postData ? `\n\n${selectedEntry.request.postData.text}` : '';
                 textarea.value = requestLine + headers + body;
             }
