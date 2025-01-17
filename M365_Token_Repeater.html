@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>M365 Token Repeater</title>
+<style>
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-feature-settings: normal;
+    font-family: monospace;
+    font-variation-settings: normal;
+    line-height: 1.5;
+    tab-size: 4;
+    }
+    .container {
+    display: flex;
+    height: 100%;
+    }
+
+    .left-panel {
+      flex-shrink: 0; 
+      width: 20%;
+      background-color: black;
+      padding: 20px;
+      overflow: auto; 
+    }
+
+    .middle-content {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+      color: white;
+      background-color: #343541;
+    }
+
+    .button-left{
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #343541;
+      color: white;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .button-center {
+      display: block;
+    /*  width: 100%; */
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #343541;
+      color: white;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      /* border-radius: 5px; */
+    }
+
+    .button-center1 {
+      /* display: block; */
+    /*  width: 100%; */
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: darkred;
+      color: white;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+     
+    }
+
+    .button-left:hover {
+      background-color:  #1f1f24;
+    }
+
+    .button-center {
+      background-color: darkred;
+    }
+
+    .button-center:hover {
+      background-color:  black;
+    }
+
+ 
+    .button-center1:hover {
+      background-color:  black;
+    }
+    .search-input {
+      display: none;
+    }
+
+    .tab {
+    overflow: hidden;
+    /* border: 1px solid #ccc; */
+    /* background-color: #f1f1f1; */
+    }
+
+    .tab button {
+      background-color: inherit;
+      color: white;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+      font-size: 17px;
+    }
+
+    .tab button:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .tab button.active {
+      background-color: #ccc;
+      color: black;
+    }
+
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+    /* border: 1px solid #ccc; */
+      border-top: none;
+    }
+
+    .tabcontent {
+      padding: 10px; /* Adjust as needed */
+    }
+
+    .tabcontent textarea {
+      width: 100%;
+      max-width: 100%; 
+      height: 150px; 
+      box-sizing: border-box; 
+      padding: 4px; 
+      margin-bottom: 10px; 
+      border: 1px solid #ccc; 
+      resize: vertical; 
+    }
+
+
+    .tabcontent {
+      width: 100%; 
+    }
+
+    #refreshTokens select,
+    #refreshTokens textarea {
+      width: 100%; 
+      box-sizing: border-box; 
+    }
+
+    #refreshTokens textarea {
+      height: 157px; 
+    }
+
+    @media (max-width: 980px) {
+      #refreshTokens select,
+      #refreshTokens textarea {
+        max-width: none; 
+      }
+    }
+
+
+    #accessTokens select,
+    #accessTokens textarea {
+      width: 100%; 
+      box-sizing: border-box; 
+    }
+
+    #accessTokens textarea {
+      height: 157px; 
+    }
+
+     @media (max-width: 980px) {
+      #accessTokens select,
+      #accessTokens textarea {
+      max-width: none; 
+      }
+    }
+
+    .response {
+          display: block;
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 10px;
+          background-color: #343541;
+          color: white;
+          border: none;
+          text-align: left;
+          cursor: pointer;
+          border-radius: 5px;
+        }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word; 
+      overflow-wrap: break-word; 
+      word-break: break-all;
+      width: 100%; 
+    }
+    .tablinks{
+      margin-left: 10px;
+    }
+    #idToken{
+        margin-left: 10px;
+    }
+
+    .input-center{
+          /* display: block; */
+          width: 300px;
+          height: 24px;
+          padding: 5px;
+          margin-bottom: 10px;
+          margin-left: 10px;
+          background-color: white;
+          color: black;
+          border: none;
+          text-align: left;
+        /*  border-radius: 5px; */
+        }
+
+        .left-panel-line{
+          border: 1px solid #fff; 
+      
+        }
+
+
+#responseOutput table {
+    background-color: black;
+}
+
+
+#responseOutput table tbody tr.highlight {
+    background-color: red;
+}
+
+.chart-wrapper {
+    background-color: black;
+}
+
+
+
+</style>
+</head>
+<body>
+
+<div class="container">
+<!-- Left Panel -->
+<div class="left-panel">
+    
+  <button id="uploadButton" class="button-left">Upload HAR File...</button>
+  <input type="file" id="fileInput" accept=".har" multiple class="search-input" style="display:none;">
+  <button id="uploadButtonJson" class="button-left">Upload JSON File...</button>
+  <input type="file" id="fileInputJson" accept=".json" multiple class="search-input" style="display:none;">
+  <button id= "accessTokenButton" class="button-left" >Access Token</button>
+  <button id= "refreshTokenButton" class="button-left" >Refresh Token</button>
+  <pre class="left-panel-line"></pre>
+  <button id= "meButton" class="button-left">Info (me)</button>
+  <button id= "listUsersButton" class="button-left" >List Users</button>
+  <button id= "listGroupsButton" class="button-left" >List Groups</button>
+  <button id= "listDevices" class="button-left">List Devices</button>
+  <button id= "MFAPrediction" class="button-left" >MFA Prediction</button>
+  <pre class="left-panel-line"></pre>
+  <button id= "exportUsersButton" class="button-left" >Export Users</button>
+  <button id= "exportAllUsersButton" class="button-left" >Export Users Full</button>
+  <button id= "exportGroupsButton" class="button-left" >Export Groups</button>
+  <button id= "exportDevicesButton" class="button-left" >Export Devices</button>
+  <p style="color: white;">
+  &nbsp;Version: 1.0 @quahac 
+  <a title="https://github.com/quahac" href="https://github.com/quahac" target="_blank" style="color: white; text-decoration: underline;">GitHub</a>&nbsp;
+  <a title="https://x.com/quahac" href="https://x.com/quahac" target="_blank" style="color: white; text-decoration: underline;">X</a>
+</p>
+</div>
+<!-- Left Panel End -->
+
+<!-- Middle Panel -->
+<div class="middle-content">
+  <!-- Access Token -->
+  <div id="accessTokenTab" class="tabcontent">
+    <div id="accessTokens">
+        <label>Url:</label><br>
+        <select id="urlsAccessTokens" size="5"></select>
+        <br><label>Bearer in request:</label><br>
+        <select id="headerAccessTokens" size="3"></select>
+    </div>
+  </div>
+  <!-- Refresh token -->
+  <div id="refreshTokenTab" class="tabcontent">
+    <div id="refreshTokens">
+      <label>Url:</label><br>
+      <select id="urlsRefreshTokens" size="3"></select><br>
+      <label>Request:</label><br>
+      <textarea id="requestRefreshTokens" rows="10" cols="50"></textarea>
+      <br>
+      <button class="button-center" id="requestButtonRefreshTokens">Replay Request to Generate Access Token</button>
+      <textarea id="responseRefreshTokens" rows="10" cols="50"></textarea>
+    </div>
+  </div>
+  <!-- Token Input -->
+  <label id="idToken" for="token">Access Token:</label>
+    <input class="input-center" type="text" id="token" name="token" required>
+    <button class="button-center1" id="parseTokenButton">Parse Token</button>
+    <button class="button-center1" id="clearTokenButton">Clear Token</button>
+    <button class="button-center1" id="copyTokenButton">Copy Token</button>
+    <pre class="response" id="jwtFields"></pre>
+    <!-- <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for names.."> 
+    <div id="chart_div" style="width: 400px; height: 120px;"></div> -->
+
+    <pre id="responseOutput"></pre>
+    <!-- <p id="coords">Mouse Position: X: 0, Y: 0</p> -->
+
+   
+    
+
+</div>
+<!-- Middle Panel End -->
+
+
+<script>
+
+    const accessTokenButton  = document.getElementById('accessTokenButton');
+    const refreshTokenButton = document.getElementById('refreshTokenButton');
+
+    const uploadButton = document.getElementById('uploadButton');
+    const fileInput    = document.getElementById('fileInput');
+    const uploadButtonJson = document.getElementById('uploadButtonJson');
+    const fileInputJson    = document.getElementById('fileInputJson');
+
+    const parseTokenButton = document.getElementById('parseTokenButton');
+    const clearTokenButton = document.getElementById('clearTokenButton');
+    
+    const copyTokenButton = document.getElementById('copyTokenButton');
+
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    const tablinks   = document.getElementsByClassName("tablinks");
+
+    const urlsAccessTokens = document.getElementById('urlsAccessTokens');
+    const headerAccessTokens = document.getElementById('headerAccessTokens');
+
+    const urlsRefreshTokens = document.getElementById('urlsRefreshTokens');
+    const requestRefreshTokens = document.getElementById('requestRefreshTokens');
+
+    const requestButtonRefreshTokens = document.getElementById('requestButtonRefreshTokens');
+    const responseRefreshTokens = document.getElementById('responseRefreshTokens');
+
+    const tokenInput = document.getElementById('token');
+    const jwtFieldsContainer = document.getElementById('jwtFields');
+
+    const responseOutput = document.getElementById('responseOutput');
+    const listUsersButton = document.getElementById('listUsersButton');
+
+    const exportUsersButton = document.getElementById('exportUsersButton');
+    const exportAllUsersButton = document.getElementById('exportAllUsersButton');
+    const exportGroupsButton = document.getElementById('exportGroupsButton');
+    const exportDevicesButton = document.getElementById('exportDevicesButton');
+
+    const MFAPredictionButton = document.getElementById('MFAPrediction');
+
+    const listGroupsButton = document.getElementById('listGroupsButton');
+    const meButton = document.getElementById('meButton');
+    
+    const listDevices = document.getElementById('listDevices');
+
+    listGroupsButton.addEventListener('click',()=> listGroupsFunction())
+    listDevices.addEventListener('click',()=> listDevicesFunction())
+
+    meButton.addEventListener('click',()=> meInfo())
+
+    exportAllUsersButton.addEventListener('click',() => downloadAllUsers())
+    exportGroupsButton.addEventListener('click',() => downloadGroups())
+    exportDevicesButton.addEventListener('click',() => downloadDevices())
+    MFAPredictionButton.addEventListener('click',() => getUsersDataFull())
+
+    accessTokenButton.addEventListener('click',() => openTab(event, 'accessTokenTab'))
+    refreshTokenButton.addEventListener('click',() => openTab(event, 'refreshTokenTab'))
+
+    // jwtFieldsContainer.addEventListener('click',() => openTab(event, 'refreshTokenTab'))
+
+    urlsAccessTokens.addEventListener('change',() => updateHeaders(urlsAccessTokens.value))
+    headerAccessTokens.addEventListener('change',() => copyToInput())
+
+    // urlsRefreshTokens.addEventListener('click',()=> displayRequestDetails())
+    urlsRefreshTokens.addEventListener('change',()=> displayRequestDetails())
+    requestButtonRefreshTokens.addEventListener('click',()=> replayRequest())
+
+    parseTokenButton.addEventListener('click', parseAndDisplayToken);
+    clearTokenButton.addEventListener('click', clearToken);
+    copyTokenButton.addEventListener('click', copyText);
+
+    // File Input Handle
+    uploadButton.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      const fileNames = Array.from(fileInput.files).map(file => file.name).join(', ');
+      uploadButton.textContent = fileNames.length > 0 ? `Files Selected: ${fileNames}` : 'Select Files';
+      allUsers.length = 0 // CLEAR ALL USERS
+      allDevices.length = 0 // CLEAR ALL DEVICES
+    });
+
+    // File Input Handle
+    uploadButtonJson.addEventListener('click', () => fileInputJson.click());
+    // fileInputJson.addEventListener('change', () => {
+    //   const fileNames = Array.from(fileInputJson.files).map(file => file.name).join(', ');
+    //   uploadButtonJson.textContent = fileInputJson.length > 0 ? `Files Selected: ${fileNames}` : 'Select Files';
+    // //   allUsers.length = 0 // CLEAR ALL USERS
+    // //   allDevices.length = 0 // CLEAR ALL DEVICES
+    // });
+
+
+    function openTab(evt, documentIdName) {
+      // Use forEach for cleaner iteration over HTMLCollections
+      Array.from(tabcontent).forEach(content => content.style.display = "none");
+      Array.from(tablinks).forEach(link => link.classList.remove("active"));
+      // Display the clicked tab's content and add "active" class to the clicked tab link
+      document.getElementById(documentIdName).style.display = "block";
+      evt.currentTarget.classList.add("active");
+      responseOutput.textContent = ''
+      jwtFieldsContainer.style.display = "block"
+    }
+
+    // HAR file read input file // AccessToken  / RefreshToken parse  
+    let headersByURL = {};
+    fileInput.addEventListener('change', function(event) {
+        headersByURL = {};
+        clearSelectionBoxes();
+        const files = event.target.files;
+        if (!files) {
+            return;
+        }
+        Array.from(files).forEach(file => {      
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const har = JSON.parse(content);
+                processHarFile(har);
+                filteredEntries = har.log.entries.filter(entry => 
+                        entry.request.postData && entry.request.postData.text.includes('grant_type=refresh_token'));
+                populateListbox(filteredEntries);
+            };
+            reader.readAsText(file);
+        });
+    });
+
+    function processHarFile(har) {
+        const entries = har.log.entries;
+        entries.forEach(entry => {
+            entry.request.headers.forEach(header => {
+                if (header.name.toLowerCase() === 'authorization' 
+                && header.value.toLowerCase().includes('bearer') 
+                && header.value.length > 10) {
+                    const url = entry.request.url;
+                    if (!headersByURL[url]) {
+                        headersByURL[url] = new Set();
+                    }
+                    headersByURL[url].add(header.value);
+                }
+            });
+        });
+        updateUrlsSelectBox();
+    }
+
+    function updateUrlsSelectBox() {
+      urlsAccessTokens.innerHTML = '';
+        for (const url in headersByURL) {
+            const option = document.createElement('option');
+            option.textContent = url;
+            option.value = url;
+            urlsAccessTokens.appendChild(option);
+        }
+    }
+
+    function clearSelectionBoxes() {
+        if (urlsAccessTokens) urlsAccessTokens.innerHTML = '';
+        if (headerAccessTokens) headerAccessTokens.innerHTML = '';
+    }
+
+    function updateHeaders(selectedUrl) {
+        headerAccessTokens.innerHTML = '';
+        if (headersByURL[selectedUrl]) {
+            headersByURL[selectedUrl].forEach(headerValue => {
+                const bearerToken = headerValue.replace('Bearer ', '').trim();
+                const option = document.createElement('option');
+                option.textContent = bearerToken;
+                headerAccessTokens.appendChild(option);
+            });
+            if (headerAccessTokens.options.length > 0) {
+                headerAccessTokens.selectedIndex = 0; // Select the first item
+                copyToInput(); // Copy the value of the first item to the input
+                parseAndDisplayToken();
+            }	
+        }
+    }
+
+    function copyToInput() {
+        if (headerAccessTokens.selectedIndex >= 0) {
+            tokenInput.value = headerAccessTokens.options[headerAccessTokens.selectedIndex].text;
+        }
+        parseAndDisplayToken();
+    }
+
+
+    function populateListbox(entries) {
+        urlsRefreshTokens.innerHTML = '';
+        entries.forEach((entry, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = entry.request.url;
+            urlsRefreshTokens.appendChild(option);
+        });
+    }
+
+    function displayRequestDetails() {
+        const selectedIndex = urlsRefreshTokens.selectedIndex;
+        const selectedEntry = filteredEntries[selectedIndex];
+        if (selectedEntry) {
+            const requestLine = `${selectedEntry.request.method} ${selectedEntry.request.url} HTTP/1.1\n`;
+            // const headers = selectedEntry.request.headers.map(header => `${header.name}: ${header.value}`).join('\n');
+            const headers = selectedEntry.request.headers
+            .filter(header => !header.name.startsWith(':'))
+            .map(header => `${header.name}: ${header.value}`)
+            .join('\n');
+
+            const body = selectedEntry.request.postData ? `\n\n${selectedEntry.request.postData.text}` : '';
+            requestRefreshTokens.value = requestLine + headers + body;
+        }  
+    }
+
+    async function replayRequest() {
+        const requestDetails = requestRefreshTokens.value;
+        try {
+            const { url, options } = parseRequestDetails(requestDetails);
+            const response = await fetch(url, options);
+            const text = await response.text();
+            responseRefreshTokens.value = text;
+            // Check if response is JSON and extract access_token
+            try {
+                const jsonResponse = JSON.parse(text);
+                if (jsonResponse.access_token) {
+                    tokenInput.value = jsonResponse.access_token;
+                    document.getElementById('parseTokenButton').click(); // Programmatically click the button
+                }
+            } catch (jsonError) {
+                // Handle the case where the response is not JSON or doesn't contain access_token
+                console.error('JSON parsing error or access_token not found:', jsonError);
+            }
+        } catch (error) {
+          responseRefreshTokens.value = 'Error: ' + error.message;
+        }
+    }
+
+
+    function parseRequestDetails(details) {
+        const lines = details.split('\n');
+        const requestLine = lines[0].split(' ');
+        const method = requestLine[0];
+        const url = requestLine[1];
+        const headers = {};
+        let body = null;
+        let isBody = false;
+
+        lines.slice(1).forEach(line => {
+            if (line === '') {
+                isBody = true;
+                return;
+            }
+            if (!isBody) {
+                const [key, value] = line.split(': ');
+                headers[key] = value;
+            } else {
+                body = (body || '') + line;
+            }
+        });
+        return {
+            url: url,
+            options: {
+                method: method,
+                headers: headers,
+                body: method !== 'GET' ? body : undefined
+            }
+        };
+    }
+
+
+
+// DISPLAY TOKEN
+function parseAndDisplayToken() {
+    allDevices.length = 0 
+    allUsers.length = 0
+    const jwt = tokenInput.value;
+    try {
+        // Ensure the JWT format is correct
+        if (!jwt || jwt.split('.').length !== 3) {
+            throw new Error('Invalid JWT format');
+        }
+
+        // Parse the JWT payload (second part of the JWT)
+        const payloadBase64 = jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const decodedPayload = atob(payloadBase64);
+        let payload;
+        try {
+            payload = JSON.parse(decodedPayload);
+        } catch (e) {
+            throw new Error('Invalid payload: Not valid JSON');
+        }
+
+        // Calculate minutes to expire
+        const expirationDate = new Date(payload.exp * 1000);
+        const currentDate = new Date();
+        const differenceInMilliseconds = expirationDate - currentDate;
+        const minutesToExpire = Math.floor(differenceInMilliseconds / 60000);
+
+        // Extract the desired fields and add Minutes to Expire
+        const extractedFields = {
+            Token: minutesToExpire >= 0 ? `${minutesToExpire} minutes to expire` : 'Expired',
+            Audience: payload.aud || 'n/a',
+            Issuer: payload.iss || 'n/a',
+            // Consider using toLocaleString() with options for better readability
+            ExpirationTime: expirationDate.toLocaleString(),
+            AppDisplayName: payload.app_displayname || 'n/a',
+            AppID: payload.appid || 'n/a',
+            Name: payload.name || 'n/a',
+            UserPrincipalName: payload.upn || 'n/a',
+            Scope: payload.scp || 'n/a',
+            TenantID: payload.tid || 'n/a',
+        };
+
+        jwtFieldsContainer.innerHTML = '';
+        Object.entries(extractedFields).forEach(([field, value]) => {
+            const div = document.createElement('div');
+            if (field === 'Token') {
+                const contentSpan = document.createElement('span');
+                contentSpan.textContent = value;
+                contentSpan.style.backgroundColor = value === 'Expired' ? 'darkred' : 'darkgreen';
+                contentSpan.style.color = 'white';
+                div.textContent = `${field}: `;
+                div.appendChild(contentSpan);
+            } else {
+                div.textContent = `${field}: ${value}`;
+            }
+            jwtFieldsContainer.appendChild(div);
+        });
+
+    } catch (error) {
+        jwtFieldsContainer.innerHTML = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.textContent = error.message;
+        errorDiv.style.backgroundColor = 'darkred';
+        errorDiv.style.color = 'white';
+        jwtFieldsContainer.appendChild(errorDiv);
+    }
+}
+
+
+
+let me_info = []
+function meInfo() {
+  responseOutput.textContent = 'Loading...';
+  document.getElementById("accessTokenTab").style.display = "none";
+  document.getElementById("refreshTokenTab").style.display = "none";
+
+  const accessToken = tokenInput.value;
+  fetch('https://graph.microsoft.com/v1.0/me', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`, // Authorization header with the access token
+      'Content-Type': 'application/json' // Additional headers can be specified here
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json(); // Parse JSON response if response was ok
+    }
+    switch (response.status) {
+      case 400:
+        throw new Error('Bad Request. Please check your request parameters.');
+      case 401:
+        throw new Error('Unauthorized. Please check your access token.');
+      case 403:
+        throw new Error('Forbidden. You do not have permission to access this resource.');
+      case 404:
+        throw new Error('Not Found. The requested resource could not be found.');
+      case 500:
+        throw new Error('Internal Server Error. Something went wrong on the server.');
+      default:
+        throw new Error(`Error: ${response.status}. ${response.statusText}`);
+    }
+  })
+  .then(data => {
+    // Display the data in a table format
+    const table = document.createElement('table');
+    for (const key in data) {
+        if (key !== "@odata.context") { // Skip the @odata.context field
+            const row = table.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            cell1.textContent = key.charAt(0).toUpperCase() + key.slice(1); // Capitalize first letter
+            cell2.textContent = Array.isArray(data[key]) ? data[key].join(', ') : data[key];
+        }
+    }
+
+
+    // Clear the previous content and append the new table
+    responseOutput.innerHTML = '';
+    responseOutput.appendChild(table);
+    jwtFieldsContainer.style.display = "none";
+  })
+  .catch(error => {
+    console.error('There has been a problem with your fetch operation:', error);
+    responseOutput.textContent = error.toString();
+  });
+}
+
+
+//List Users
+let allUsers = [] //STORE USERS
+async function allUsers_get() {
+    // allUsers.length = 0
+    clearDisplay();
+    if (allUsers && allUsers.length > 0) {
+            const userPrincipalNames = allUsers.map(user => user.userPrincipalName);
+            responseOutput.textContent = userPrincipalNames.join('\n');
+            console.log("Displaying users from memory");
+        return; // Exit the function
+    }
+    const token = tokenInput.value;
+    try {
+        allUsers = await fetchAllUsers(token);
+        // Display userPrincipalName fields only
+        if (allUsers && allUsers.length > 0) {
+            const userPrincipalNames = allUsers.map(user => user.userPrincipalName);
+            responseOutput.textContent = userPrincipalNames.join('\n');
+            window.userPrincipalNamesForExport = userPrincipalNames; // Store for exporting
+        } else {
+            responseOutput.textContent = 'No users found.';
+        }
+    } catch (error) {
+        responseOutput.textContent = 'Error: ' + error.message;
+    }
+}
+
+// Use the async function directly in the event listener
+listUsersButton.addEventListener('click', async function() {
+    await allUsers_get();
+});
+
+
+
+// Function to fetch all users using pagination
+async function fetchAllUsers(token) {
+    const initialUrl = 'https://graph.microsoft.com/v1.0/users';
+    // let allUsers = [];
+    let url = initialUrl;
+    while (url) {
+        const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`); // Handle HTTP errors
+        }
+        const data = await response.json();
+
+        if (data.value) {
+            allUsers.push(...data.value); // Efficiently add users to the array
+        }
+        url = data['@odata.nextLink'];
+    }
+    return allUsers;
+}
+
+
+
+
+// Function to copy text to clipboard
+function copyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+  }
+
+  // Event listener for clicks on the document
+  jwtFieldsContainer.addEventListener("click", function(event) {
+    const target = event.target; // The clicked element
+    if (target.id) { // Check if the element has an ID
+      const textToCopy = target.innerText || target.textContent; // Get the text content
+      // console.log(textToCopy)
+      copyTextToClipboard(textToCopy);
+      // alert("Text copied: " + textToCopy);
+    }
+  });
+
+// Assuming listUsers is an async function or returns a promise that resolves once userPrincipalNamesForExport is populated
+function listUsers() {
+    return new Promise((resolve, reject) => {
+        listUsersButton.click();
+        // Wait for some condition to be met (e.g., userPrincipalNamesForExport is populated)
+        // This is a placeholder; you need to replace it with actual logic to determine when the operation is complete
+        let checkInterval = setInterval(() => {
+            if (window.userPrincipalNamesForExport) {
+                clearInterval(checkInterval);
+                resolve();
+            }
+            // Optionally, include a timeout to reject the promise if it takes too long
+        }, 100); // Check every 100ms
+    });
+}
+
+  // Function to export users to a text file
+  function exportUsersToFile(users) {
+  const userText = users.join('\n');
+
+  const blob = new Blob([userText], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'users.txt';
+  a.click();
+  }
+
+  // Export Users
+  exportUsersButton.addEventListener('click', function() {
+    clearDisplay()
+    if (window.userPrincipalNamesForExport) {
+        exportUsersToFile(window.userPrincipalNamesForExport);
+    } else {
+        listUsers().then(() => {
+            if (window.userPrincipalNamesForExport) {
+                exportUsersToFile(window.userPrincipalNamesForExport);
+            } else {
+                alert('No user data available for export.');
+            }
+        }).catch((error) => {
+            console.error('Error listing users:', error);
+            alert('Failed to list users.');
+        });
+    }
+});
+
+
+
+
+let myData = []
+let mergedData = []
+
+// USER DATA EXPORT
+// USER DATA EXPORT
+function getUsersDataFull() {
+    clearDisplay()
+    if(mergedData && mergedData.length > 0){
+        generateAndInsertTable(mergedData,1)
+        return
+    }
+
+    function downloadJSON(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    const secret = document.getElementById("token").value;
+    
+
+    async function fetchData(id) {
+        const response = await fetch("https://graph.microsoft.com/beta/users/" + id + "?$select=id,accountEnabled,userPrincipalName,lastPasswordChangeDateTime,createdDateTime", {
+            headers: {
+                accept: "application/json, text/plain, */*",
+                authorization: "Bearer " + secret
+            },
+            method: "GET"
+        });
+        return response.json();
+    }
+
+    let formattedData = [];
+
+    async function fetchUserData() {
+       let tableString = "" 
+       lengthUsers = myData.length + 1   
+        for (const data of myData) {
+            try {
+                const userData = await fetchData(data.id);
+                const formattedUserDisplay = {
+                    id: userData.id,
+                    userPrincipalName: userData.userPrincipalName,
+                    countLengthUsers: lengthUsers = lengthUsers-1
+                };
+
+                const timeDifference = Math.floor((new Date(userData.lastPasswordChangeDateTime).getTime() - new Date(userData.createdDateTime).getTime()) / 1000);
+
+                const formattedUser = {
+                    id: userData.id,
+                    userPrincipalName: userData.userPrincipalName,
+                    lastPasswordChangeDateTime: userData.lastPasswordChangeDateTime,
+                    createdDateTime: userData.createdDateTime,
+                    timeDifference: timeDifference,
+                    accountEnabled: userData.accountEnabled,
+                    mfaEnabled: (Math.floor((new Date(userData.lastPasswordChangeDateTime).getTime() - new Date(userData.createdDateTime).getTime()) / 1000) <= 0) ? 'false' : '?'
+                };
+                
+                formattedData.push(formattedUser);
+               // if (userData.accountEnabled){    
+                    // Format each user's data with fixed-width columns
+                    tableString += `${formattedUserDisplay.countLengthUsers.toString().padEnd(2)} - ${formattedUserDisplay.userPrincipalName.toString().padEnd(97)}\n`;
+
+                    //}    
+
+                } catch (error) {
+                    console.error(error);
+                }
+                    // Set the table string as the textContent of the pre element
+                document.getElementById('responseOutput').textContent = tableString;
+        }
+    }
+
+    async function fetchAllDataAndUserData() {
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url, {
+                    "headers": {
+                        "accept": "application/json, text/plain, */*",
+                        "authorization": "Bearer " + secret
+                    },
+                    "method": "GET"
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function fetchAllData() {
+            try {
+                let url = "https://graph.microsoft.com/beta/users";
+                while (url) {
+                    const data = await fetchData(url);
+                    if (data && data.value) {
+                        myData = myData.concat(data.value);                    
+
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    url = data['@odata.nextLink'];
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+        }
+
+        await fetchAllData();
+        await fetchUserData();
+    }
+
+    (async () => {
+            await fetchAllDataAndUserData();
+            mergedData = myData.map(data => {
+                const formattedUser = formattedData.find(user => user.id === data.id);
+                return { ...data, ...formattedUser };
+            });
+            generateAndInsertTable(mergedData,1)
+            // const mergedJSON = JSON.stringify(mergedData);
+            // downloadJSON(mergedJSON, "users_full.json");
+            // document.getElementById("MFAPrediction").style.display = "block";
+        })();
+    }
+
+
+
+function downloadAllUsers(){
+    function downloadJSON(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+    const mergedJSON = JSON.stringify(mergedData);
+    downloadJSON(mergedJSON, "users_full.json");
+
+}
+
+
+
+let allGroupsList
+async function listGroupsFunction() {
+    clearDisplay();
+    if(allGroupsList && allGroupsList.length > 0){
+        jsonGroups()
+        return
+    }
+    document.getElementById("exportGroupsButton").disabled = false;
+    document.getElementById("exportGroupsButton").style.backgroundColor = "#343541";
+    responseOutput.textContent = 'Loading...';
+    const url = "https://graph.microsoft.com/v1.0/groups";
+    const bearerToken = tokenInput.value; // Assume tokenInput is a valid input element
+
+    if (!bearerToken) {
+        responseOutput.textContent = 'Please provide a valid bearer token.';
+        return;
+    }
+
+    const headers = {
+        Authorization: `Bearer ${bearerToken}`,
+        "Content-Type": "application/json"
+    };
+
+    // Function to fetch all groups recursively
+    async function fetchGroups(nextUrl, allGroups = []) {
+        const response = await fetch(nextUrl, { method: "GET", headers });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        allGroups.push(...data.value);
+
+        // Check for @odata.nextLink to fetch more groups
+        if (data['@odata.nextLink']) {
+            await fetchGroups(data['@odata.nextLink'], allGroups);
+        }
+
+        return allGroups;
+    }
+
+    // Start fetching groups
+    fetchGroups(url)
+        .then(allGroups => {
+            if (allGroups.length > 0) {
+                const table = createDataTableForGroups(); // Adjusted function for groups
+                populateDataTableForGroups(table, allGroups); // Adjusted function for groups
+                responseOutput.textContent = ''; // Clear loading or previous messages
+                responseOutput.appendChild(table);
+                allGroupsList = allGroups
+            } else {
+                throw new Error('No groups found.');
+            }
+        })
+        .catch(error => {
+            responseOutput.textContent = `Error: ${error.message}`;
+        });
+}
+
+
+
+
+function createDataTableForGroups() {
+    // Check if style for groupTable is already injected, to avoid duplicating styles
+    if (!document.getElementById('groupTableStyles')) {
+        const style = document.createElement('style');
+        style.id = 'groupTableStyles'; // Assign an ID to prevent duplicate style elements
+        style.innerHTML = `
+            #groupTable th, #groupTable td {
+                border: 1px solid white;
+                padding: 8px;
+            }
+            #groupTable {
+                border-collapse: collapse;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const table = document.createElement('table');
+    table.removeAttribute('border'); // Remove the border attribute as we're using CSS for borders
+    table.id = 'groupTable';
+    const headers = ['Mail Nickname', 'Mail', 'Created DateTime', 'Group Types', 'Mail Enabled'];
+    const thead = table.createTHead();
+    const row = thead.insertRow();
+
+    headers.forEach((headerText, columnIndex) => {
+        const header = document.createElement('th');
+        header.textContent = headerText;
+        header.style.cursor = 'pointer'; // Change cursor to indicate clickable
+        row.appendChild(header);
+        // Attach click listener for sorting
+        header.addEventListener('click', () => sortTableByColumnGroups(table, columnIndex));
+    });
+
+    return table;
+}
+
+
+function populateDataTableForGroups(table, groups) {
+    const tbody = table.createTBody();
+    tbody.id = 'groupTableBody'; // Added an ID for easy reference
+    groups.forEach(group => {
+        const row = tbody.insertRow();
+        const cellData = [
+            group.mailNickname,
+            group.mail || 'n/a',
+            group.createdDateTime,
+            group.groupTypes.join(', ') || 'n/a',
+            group.mailEnabled.toString()
+        ];
+        cellData.forEach(text => {
+            const cell = row.insertCell();
+            cell.textContent = text;
+            cell.style.padding = '5px';
+            
+        });
+    });
+}
+
+function sortTableByColumnGroups(table, columnIndex) {
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const isAscending = tbody.getAttribute('data-sort-asc') === 'true';
+    rows.sort((a, b) => {
+        const aText = a.querySelectorAll('td')[columnIndex].textContent.toLowerCase();
+        const bText = b.querySelectorAll('td')[columnIndex].textContent.toLowerCase();
+
+        return aText.localeCompare(bText, undefined, {numeric: true, sensitivity: 'base'}) * (isAscending ? 1 : -1);
+    });
+
+    // Toggle the sort direction
+    tbody.setAttribute('data-sort-asc', !isAscending);
+
+    // Re-append rows to tbody
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+
+
+// DEVICES
+let allDevices = [];
+async function listDevicesFunction() {
+    if(allDevices && allDevices.length > 0) {
+        responseOutput.textContent = 'Loading...';
+        // Devices are already loaded in memory, display them directly
+        console.log("Displaying devices from memory");
+        updateUIWithDevices(allDevices);
+        return; // Exit the function early as no need to fetch devices again
+    }
+
+    if(allUsers.length == 0) {
+        await allUsers_get(); // Refresh data if users exist
+    } else {
+        console.log("No users to refresh");
+    }
+    clearDisplay();
+    responseOutput.textContent = 'Loading...';
+    const bearerToken = tokenInput.value; // Assume tokenInput is a valid input element
+    if (!bearerToken) {
+        responseOutput.textContent = 'Please provide a valid bearer token.';
+        return;
+    }
+    const headers = {
+        Authorization: `Bearer ${bearerToken}`,
+        "Content-Type": "application/json"
+    };
+
+    async function fetchDevices(url) {
+        try {
+            let response = await fetch(url, { method: "GET", headers: headers });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            let data = await response.json();
+            if (data.value && data.value.length > 0) {
+                allDevices = allDevices.concat(data.value);
+                if (data['@odata.nextLink']) {
+                    await fetchDevices(data['@odata.nextLink']); // Recursive call for pagination
+                } else {
+                    // Once all devices are fetched, update UI
+                    updateUIWithDevices(allDevices);
+                }
+            } else if (!document.getElementById('deviceTable')) {
+                throw new Error('No devices found.');
+            }
+        } catch (error) {
+            responseOutput.textContent = `Error: ${error.message}`;
+        }
+    }
+
+    // Initial call to start fetching devices
+    await fetchDevices("https://graph.microsoft.com/v1.0/devices");
+}
+
+function updateUIWithDevices(devices) {
+    let table;
+    if (document.getElementById('deviceTable')) {
+        table = document.getElementById('deviceTable');
+    } else {
+        table = createDataTable();
+        responseOutput.textContent = ''; // Clear loading or previous messages
+        responseOutput.appendChild(table);
+    }
+    populateDataTable(table, devices);
+}
+
+function createDataTable() {
+    // Inject global styles for table cells
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #deviceTable th, #deviceTable td {
+            border: 1px solid white;
+            padding: 8px;
+        }
+        #deviceTable {
+            border-collapse: collapse;
+        }
+    `;
+    document.head.appendChild(style);
+
+    const table = document.createElement('table');
+    // Removed inline style setting for border and padding since it's now handled by the global style
+    table.id = 'deviceTable';
+    const headers = ['Operating System', 'OS Version', 'Profile Type', 'Display Name', 'Created DateTime', 'Last Sign In DateTime', 'Trust Type', 'Compliant', 'Managed', 'Rooted', 'UserPrincipalName'];
+    const thead = table.createTHead();
+    const row = thead.insertRow();
+
+    headers.forEach((headerText, index) => {
+        const header = document.createElement('th');
+        header.textContent = headerText;
+        header.style.cursor = 'pointer'; // Change cursor to indicate clickable
+        header.addEventListener('click', () => {
+            sortTableByColumnDevices(table, index);
+        });
+        row.appendChild(header);
+    });
+
+    return table;
+}
+
+function sortTableByColumnDevices(table, columnIndex) {
+    const tbody = table.getElementsByTagName('tbody')[0];
+    const rows = Array.from(tbody.getElementsByTagName('tr'));
+    const isNumeric = rows.every(row => !isNaN(row.cells[columnIndex].textContent.trim()));
+
+    // Toggle sort direction with each click
+    const getSortDirection = (columnIndex) => {
+        if (table.sortColumn === columnIndex) {
+            // If already sorted this column, toggle direction
+            table.sortDirection = table.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Default to ascending sort for new column
+            table.sortDirection = 'asc';
+        }
+        table.sortColumn = columnIndex;
+        return table.sortDirection;
+    };
+
+    const direction = getSortDirection(columnIndex);
+
+    rows.sort((rowA, rowB) => {
+        const cellA = rowA.cells[columnIndex].textContent.trim();
+        const cellB = rowB.cells[columnIndex].textContent.trim();
+
+        const comparison = isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
+
+        return direction === 'asc' ? comparison : -comparison;
+    });
+
+    // Reattach rows in sorted order
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+
+
+
+function augmentDevicesWithUserNames(devices, users) {
+    const userMap = new Map(users.map(user => [user.id, user.userPrincipalName]));
+    
+    devices.forEach(device => {
+        const userHwidMatches = device.physicalIds.filter(id => id.startsWith("[USER-HWID]"));
+        userHwidMatches.forEach(match => {
+            const userId = match.split(':')[1]; // Extract user ID from the USER-HWID
+            if (userMap.has(userId)) {
+                device.userPrincipalName = userMap.get(userId); // Add userPrincipalName to the device object
+            }
+        });
+    });
+}
+
+function populateDataTable(table, devices) {
+    augmentDevicesWithUserNames(devices, allUsers); // Call this before sorting and populating the table
+
+    // Sort devices as needed before populating the table
+    const sortedDevices = devices.sort((a, b) => {
+        // Sorting logic remains the same...
+    });
+
+    const tbody = table.createTBody();
+    sortedDevices.forEach(device => {
+        const row = tbody.insertRow();
+        const cellData = [
+            device.operatingSystem,
+            device.operatingSystemVersion,
+            device.profileType,
+            device.displayName,
+            device.createdDateTime,
+            device.approximateLastSignInDateTime,
+            device.trustType,
+            device.isCompliant,
+            device.isManaged,
+            device.isRooted,
+            device.userPrincipalName || 'N/A' // Include the userPrincipalName or 'N/A' if not available
+        ];
+        cellData.forEach(text => {
+            const cell = row.insertCell();
+            cell.textContent = text;
+            cell.style.padding = '5px';
+        });
+    });
+}
+
+
+
+
+// MFA PREDICTION
+function generateAndInsertTable(dataArray, dataArrayId) {
+    const table = document.createElement('table');
+    table.setAttribute('style', 'border-collapse: collapse; width: 100%;');
+    const thead = table.createTHead();
+    const tbody = table.createTBody();
+    const headerRow = thead.insertRow();
+    // Initialize headers and keys with default values
+    let headers = [];
+    let keys = [];
+
+    // Conditional setup based on the value of somenumber
+    if(dataArrayId === 1){
+    headers = ["User Principal Name", "Account Enabled", "Created DateTime", "Last Password Change DateTime", "Time Difference", "Phones"];
+    keys = ["userPrincipalName", "accountEnabled", "createdDateTime", "lastPasswordChangeDateTime", "timeDifference", "businessPhones"];
+    } else if(dataArrayId === 2) { console.log("2")}
+
+
+    // Creating header cells
+    headers.forEach(headerText => {
+        let headerCell = document.createElement('th');
+        headerCell.textContent = headerText;
+        headerCell.setAttribute('style', 'border: 1px solid white; padding: 8px;');
+        headerCell.addEventListener('click', () => sortTableByColumn(table, headers.indexOf(headerText)));
+        headerRow.appendChild(headerCell);
+    });
+
+    // Creating body cells
+    dataArray.forEach(item => {
+        const row = tbody.insertRow();
+        keys.forEach(key => {
+            const cell = row.insertCell();
+            let text = item[key];
+            if (typeof text === 'boolean') text = text ? 'Yes' : 'No'; // Convert boolean to Yes/No
+            cell.textContent = text;
+            cell.setAttribute('style', 'border: 1px solid white; padding: 8px;');
+        });
+    });
+
+    const responseOutput = document.getElementById('responseOutput');
+    responseOutput.innerHTML = ''; // Clear previous content
+    responseOutput.appendChild(table);
+}
+
+function sortTableByColumn(table, columnIndex) {
+    const rows = Array.from(table.tBodies[0].rows);
+    const sortedRows = rows.sort((a, b) => {
+        const aValue = a.cells[columnIndex].textContent.trim();
+        const bValue = b.cells[columnIndex].textContent.trim();
+
+        return aValue.localeCompare(bValue, undefined, {numeric: true, sensitivity: 'base'});
+    });
+
+    while (table.tBodies[0].firstChild) {
+        table.tBodies[0].removeChild(table.tBodies[0].firstChild);
+    }
+
+    sortedRows.forEach(row => table.tBodies[0].appendChild(row));
+}
+
+///////////////
+
+function copyText() {
+    var text = document.getElementById("token").value;
+    navigator.clipboard.writeText(text).then(function() {
+        document.getElementById("copyStatus").textContent = "Copied!";
+        setTimeout(() => document.getElementById("copyStatus").textContent = '', 2000); // Clear message after 2 seconds
+    }, function(err) {
+        document.getElementById("copyStatus").textContent = "Failed to copy!";
+        console.error('Could not copy text: ', err);
+    });
+}
+
+
+
+function downloadDevices(){
+    function downloadJSON(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+    const devicesJSON = JSON.stringify(allDevices);
+    downloadJSON(devicesJSON, "devices.json");
+
+}
+
+
+function downloadGroups(){
+    function downloadJSON(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+    const groupsJSON = JSON.stringify(allGroupsList);
+    downloadJSON(groupsJSON, "groups.json");
+
+}
+
+
+document.body.addEventListener('mousemove', function(event) {
+    // Function to set button properties based on conditions
+    function setButtonProperties(buttonId, condition) {
+        var button = document.getElementById(buttonId);
+        button.disabled = condition;
+        button.style.backgroundColor = condition ? "#1f1f24" : "#343541";
+    }
+
+    // Update the button properties based on conditions
+    setButtonProperties("exportDevicesButton", allDevices.length === 0);
+    setButtonProperties("exportUsersButton", allUsers.length === 0);
+    setButtonProperties("exportAllUsersButton", mergedData.length === 0);
+    setButtonProperties("exportGroupsButton", typeof allGroupsList === "undefined" || allGroupsList.length === 0);
+	mfa_color();
+});
+
+
+
+// Add an event listener for the 'change' event
+fileInputJson.addEventListener('change', function(event) {
+  // Get the file from the input
+  const file = event.target.files[0];
+
+  // Check if a file is selected
+  if (file) {
+    // Create a FileReader to read the file
+    const reader = new FileReader();
+    
+    // Set up the onload event handler
+    reader.onload = function(e) {
+      // Parse the file content to JSON
+      const data = JSON.parse(e.target.result);
+      if (data[0].groupTypes) {
+        allGroupsList = data;
+        jsonGroups()
+      }
+      if(data[0].operatingSystem){
+        allDevices = data;
+        updateUIWithDevices(allDevices)
+      }
+      if(data[0].lastPasswordChangeDateTime){
+        mergedData = data;
+        generateAndInsertTable(mergedData,1)
+      }
+
+      
+      // Assign the parsed data to allUsers
+    //   allGroupsList = data;
+        
+      // Log the result for demonstration
+      console.log(data);
+      
+    };
+    
+    // Read the file as text
+    reader.readAsText(file);
+  }
+});
+
+
+
+function jsonGroups(){
+    const table = createDataTableForGroups(); // Adjusted function for groups
+    populateDataTableForGroups(table, allGroupsList); // Adjusted function for groups
+    responseOutput.textContent = ''; // Clear loading or previous messages
+    responseOutput.appendChild(table);
+}
+
+
+// Clear on click
+function clearDisplay(){
+   jwtFieldsContainer.innerText = ""
+    responseOutput.textContent = 'Loading...'; // Provide immediate feedback
+    document.getElementById("accessTokenTab").style.display = "none";
+    document.getElementById("refreshTokenTab").style.display = "none";
+
+}
+
+// Clear token function
+function clearToken(){
+  tokenInput.value = ''
+  jwtFieldsContainer.innerText = ""
+}
+
+// Do something onload
+window.onload = function() {
+    try{
+    openTab(null, 'accessTokenTab')
+    }catch{
+        //
+    }
+}
+// COLOR BACKGROUND MFA ANOMALY
+// Get the table element
+function mfa_color(){
+    // Get the table element
+    var table_mfa = document.querySelector('#responseOutput table');
+
+    // Check if the table exists
+    if (table_mfa) {
+        // Check if the table has a column named "Time Difference"
+        var columnIndexes = [];
+        var headers = table_mfa.querySelectorAll('thead th');
+        headers.forEach(function(header, index) {
+            if (header.textContent.trim() === "Time Difference") {
+                columnIndexes.push(index);
+            }
+        });
+
+        // Check if any cell in the "Time Difference" column has a number less than 1
+        var rows_mfa = table_mfa.querySelectorAll('tbody tr');
+        rows_mfa.forEach(function(row) {
+            columnIndexes.forEach(function(index) {
+                var cell = row.cells[index];
+                var value = parseFloat(cell.textContent.trim());
+                if (!isNaN(value) && value < 1) {
+                    row.classList.add('highlight');
+                }
+            });
+        });
+    }
+};
+</script>
+
+</body>
+</html>
